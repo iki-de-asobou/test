@@ -236,7 +236,7 @@ button {
     right: 8px;
     bottom: 8px;
     z-index: 99999;
-    max-height: 46vh;
+    max-height: 58vh;
     overflow-y: auto;
     padding: 10px 12px;
     background: rgba(255, 255, 255, 0.97);
@@ -5558,12 +5558,12 @@ function updateAndroidDiagnostic(
     ];
 
 
+    // 診断中は、S判定の前後にかかわらず全項目を表示する。
+    // 保持中も周波数形状の変化を比較できるようにする。
     const rows =
-        soundLatched
-        ?
-        holdChecks
-        :
-        onsetChecks;
+        onsetChecks.concat(
+            holdChecks
+        );
 
 
     androidDiagnosticGrid.replaceChildren();
@@ -5760,9 +5760,37 @@ function updateAndroidDiagnostic(
                 result.spectralCentroid
             )
             +
+            " UH="
+            +
+            result.upperHighRatio.toFixed(3)
+            +
+            " VH="
+            +
+            result.veryHighRatio.toFixed(3)
+            +
+            " UH/HR="
+            +
+            upperShareOfHigh.toFixed(3)
+            +
+            " VH/HR="
+            +
+            veryHighShareOfHigh.toFixed(3)
+            +
+            " UH/LM="
+            +
+            upperToLowMid.toFixed(2)
+            +
+            " VH/M24="
+            +
+            veryHighToMid.toFixed(2)
+            +
             " Shape="
             +
             diagnosticMark(shape)
+            +
+            " Breath="
+            +
+            (breathy ? "×" : "○")
             +
             " Start="
             +
