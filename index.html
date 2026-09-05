@@ -258,6 +258,38 @@ button {
     font-weight: 700;
 }
 
+.android-mic-test {
+    margin-bottom: 10px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid #aaa;
+}
+
+.android-mic-test-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.android-mic-test-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin: 6px 0;
+}
+
+.android-mic-test-buttons button {
+    padding: 6px 8px;
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+.android-mic-test-settings {
+    font-family: monospace;
+    white-space: pre-wrap;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
 .android-diagnostic-grid {
     display: grid;
     grid-template-columns: 1fr auto auto;
@@ -810,6 +842,44 @@ button {
     class="android-diagnostic"
     aria-live="polite"
 >
+    <div
+        id="androidMicTest"
+        class="android-mic-test"
+    >
+        <div class="android-mic-test-title">
+            Android マイク処理 診断
+        </div>
+
+        <div>
+            下のボタンを押すと、その設定でマイクを再起動します。
+        </div>
+
+        <div class="android-mic-test-buttons">
+            <button type="button" data-android-mic-mode="current">
+                現在/既定
+            </button>
+            <button type="button" data-android-mic-mode="nsOff">
+                NoiseSuppression OFF
+            </button>
+            <button type="button" data-android-mic-mode="agcOff">
+                AutoGainControl OFF
+            </button>
+            <button type="button" data-android-mic-mode="nsAgcOff">
+                NS + AGC OFF
+            </button>
+            <button type="button" data-android-mic-mode="ecOff">
+                EchoCancellation OFF
+            </button>
+        </div>
+
+        <div
+            id="androidMicTestSettings"
+            class="android-mic-test-settings"
+        >
+            マイク開始後に実際の設定を表示します。
+        </div>
+    </div>
+
     <div class="android-diagnostic-title">
         Android S判定 診断
     </div>
@@ -1407,6 +1477,31 @@ const ANDROID_HOLD_HIGH_RATIO_MIN =
 const ANDROID_HOLD_ZCR_MIN =
     0.012;
 
+
+// ============================================================
+// Android：弱いS / 端末側で減衰したSの救済ルート
+// ============================================================
+// 通常のS判定は変更せず、Androidだけ別ルートを追加する。
+// 騒音だけの状態では ZCR・High Ratio・UpperHigh が低かったため、
+// 低音量を許す代わりに複数のSらしい条件を同時に要求する。
+const ANDROID_RESCUE_MIN_VOLUME =
+    0.00025;
+
+const ANDROID_RESCUE_HIGH_RATIO_MIN =
+    0.28;
+
+const ANDROID_RESCUE_ZCR_MIN =
+    0.025;
+
+const ANDROID_RESCUE_UPPER_HIGH_MIN =
+    0.19;
+
+const ANDROID_RESCUE_VERY_HIGH_MIN =
+    0.060;
+
+const ANDROID_RESCUE_UPPER_TO_LOWMID_MIN =
+    1.20;
+
 // Sらしい音が一時的に崩れた場合は、従来どおり少し長めに待つ。
 const ANDROID_RELEASE_SECONDS =
     0.60;
@@ -1787,6 +1882,12 @@ const androidDiagnosticGrid =
 const androidDiagnosticSummary =
     document.getElementById(
         "androidDiagnosticSummary"
+    );
+
+
+const androidMicTestSettings =
+    document.getElementById(
+        "androidMicTestSettings"
     );
 
 
@@ -4486,6 +4587,12 @@ let iosExternalUSBMic =
     false;
 
 
+// Androidマイク処理の診断モード。
+// production相当は "current"。Android以外には影響させない。
+let androidMicTestMode =
+    "current";
+
+
 let normalCount =
     0;
 
@@ -5535,6 +5642,21 @@ function updateAndroidDiagnostic(
         );
 
 
+    const rescue =
+        androidRescueS(
+            result
+        );
+
+
+    const rescueUpperToLowMid =
+        result.upperHighRatio
+        /
+        Math.max(
+            result.lowMidRatio,
+            0.001
+        );
+
+
     const onsetChecks = [
         ["音量", result.volume, onsetMinimum, result.volume >= onsetMinimum, 6],
         ["High Ratio", result.highRatio, HIGH_RATIO_MIN, result.highRatio >= HIGH_RATIO_MIN, 3],
@@ -5558,11 +5680,22 @@ function updateAndroidDiagnostic(
     ];
 
 
+    const rescueChecks = [
+        ["救済 音量", result.volume, ANDROID_RESCUE_MIN_VOLUME, result.volume >= ANDROID_RESCUE_MIN_VOLUME, 6],
+        ["救済 High Ratio", result.highRatio, ANDROID_RESCUE_HIGH_RATIO_MIN, result.highRatio >= ANDROID_RESCUE_HIGH_RATIO_MIN, 3],
+        ["救済 ZCR", result.zcr, ANDROID_RESCUE_ZCR_MIN, result.zcr >= ANDROID_RESCUE_ZCR_MIN, 3],
+        ["救済 UpperHigh", result.upperHighRatio, ANDROID_RESCUE_UPPER_HIGH_MIN, result.upperHighRatio >= ANDROID_RESCUE_UPPER_HIGH_MIN, 3],
+        ["救済 VeryHigh", result.veryHighRatio, ANDROID_RESCUE_VERY_HIGH_MIN, result.veryHighRatio >= ANDROID_RESCUE_VERY_HIGH_MIN, 3],
+        ["救済 Upper/LowMid", rescueUpperToLowMid, ANDROID_RESCUE_UPPER_TO_LOWMID_MIN, rescueUpperToLowMid >= ANDROID_RESCUE_UPPER_TO_LOWMID_MIN, 2]
+    ];
+
+
     // 診断中は、S判定の前後にかかわらず全項目を表示する。
     // 保持中も周波数形状の変化を比較できるようにする。
     const rows =
         onsetChecks.concat(
-            holdChecks
+            holdChecks,
+            rescueChecks
         );
 
 
@@ -5704,7 +5837,11 @@ function updateAndroidDiagnostic(
         +
         "　持続総合="
         +
-        diagnosticMark(holdOK);
+        diagnosticMark(holdOK)
+        +
+        "　救済="
+        +
+        diagnosticMark(rescue);
 
 
     // Sが成立して画像が表示されても、直前～成立中の判定を確認できるよう
@@ -5799,6 +5936,10 @@ function updateAndroidDiagnostic(
             " Hold="
             +
             diagnosticMark(holdOK)
+            +
+            " Rescue="
+            +
+            diagnosticMark(rescue)
             +
             (
                 failedNames.length > 0
@@ -6096,6 +6237,107 @@ function androidSShape(
         &&
         veryHighToMid >= 0.38
     );
+
+}
+
+
+
+// ============================================================
+// Android 弱いS / 減衰S 救済
+// ============================================================
+
+function androidRescueS(
+    result
+) {
+
+    if (
+        result.volume
+        <
+        ANDROID_RESCUE_MIN_VOLUME
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.highRatio
+        <
+        ANDROID_RESCUE_HIGH_RATIO_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.zcr
+        <
+        ANDROID_RESCUE_ZCR_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.upperHighRatio
+        <
+        ANDROID_RESCUE_UPPER_HIGH_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.veryHighRatio
+        <
+        ANDROID_RESCUE_VERY_HIGH_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    const upperToLowMid =
+        result.upperHighRatio
+        /
+        Math.max(
+            result.lowMidRatio,
+            0.001
+        );
+
+
+    if (
+        upperToLowMid
+        <
+        ANDROID_RESCUE_UPPER_TO_LOWMID_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    // 既存の「ふー」除外はそのまま使う。
+    if (
+        androidClearlyBreathy(
+            result
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
 
 }
 
@@ -7825,24 +8067,14 @@ function processResult(
 
 
         const weakCandidate =
+            IS_ANDROID
+            ?
             (
-                IS_ANDROID
-                ?
-                weakSAndroid(
-                    result
-                )
-                :
-                weakS(
-                    result
-                )
-            )
-            &&
-            iosShapeOK
-            &&
-            (
-                !IS_ANDROID
-                ||
                 (
+                    weakSAndroid(
+                        result
+                    )
+                    &&
                     !androidClearlyBreathy(
                         result
                     )
@@ -7851,6 +8083,18 @@ function processResult(
                         result
                     )
                 )
+                ||
+                androidRescueS(
+                    result
+                )
+            )
+            :
+            (
+                weakS(
+                    result
+                )
+                &&
+                iosShapeOK
             );
 
 
@@ -8072,6 +8316,10 @@ function processResult(
 
         if (
             holdSAndroid(
+                result
+            )
+            ||
+            androidRescueS(
                 result
             )
         ) {
@@ -8838,6 +9086,251 @@ function stopExistingMicrophone() {
 }
 
 
+
+// ============================================================
+// Android マイク処理 診断
+// ============================================================
+
+function androidMicModeLabel(
+    mode
+) {
+
+    switch (
+        mode
+    ) {
+
+        case "nsOff":
+            return "NoiseSuppression OFF";
+
+        case "agcOff":
+            return "AutoGainControl OFF";
+
+        case "nsAgcOff":
+            return "NoiseSuppression + AutoGainControl OFF";
+
+        case "ecOff":
+            return "EchoCancellation OFF";
+
+        default:
+            return "現在/既定";
+
+    }
+
+}
+
+
+function updateAndroidMicSettingsDisplay() {
+
+    if (
+        !IS_ANDROID
+        ||
+        !androidMicTestSettings
+    ) {
+
+        return;
+
+    }
+
+
+    let supported =
+        {};
+
+
+    try {
+
+        supported =
+            navigator.mediaDevices.getSupportedConstraints
+            ?
+            navigator.mediaDevices.getSupportedConstraints()
+            :
+            {};
+
+    }
+
+    catch (error) {
+
+        supported =
+            {};
+
+    }
+
+
+    let track =
+        null;
+
+
+    try {
+
+        const tracks =
+            mediaStream
+            ?
+            mediaStream.getAudioTracks()
+            :
+            [];
+
+
+        track =
+            tracks.length > 0
+            ?
+            tracks[0]
+            :
+            null;
+
+    }
+
+    catch (error) {
+
+        track =
+            null;
+
+    }
+
+
+    let settings =
+        {};
+
+
+    if (
+        track
+        &&
+        track.getSettings
+    ) {
+
+        try {
+
+            settings =
+                track.getSettings()
+                ||
+                {};
+
+        }
+
+        catch (error) {
+
+            settings =
+                {};
+
+        }
+
+    }
+
+
+    const valueText =
+        function(value) {
+
+            return typeof value === "undefined"
+                ?
+                "取得不可"
+                :
+                String(
+                    value
+                );
+
+        };
+
+
+    const label =
+        track
+        ?
+        (
+            track.label
+            ||
+            "（ラベルなし）"
+        )
+        :
+        "（マイク未取得）";
+
+
+    androidMicTestSettings.textContent =
+        "テスト設定: "
+        +
+        androidMicModeLabel(
+            androidMicTestMode
+        )
+        +
+        "\n入力: "
+        +
+        label
+        +
+        "\n実際の echoCancellation: "
+        +
+        valueText(
+            settings.echoCancellation
+        )
+        +
+        "\n実際の noiseSuppression: "
+        +
+        valueText(
+            settings.noiseSuppression
+        )
+        +
+        "\n実際の autoGainControl: "
+        +
+        valueText(
+            settings.autoGainControl
+        )
+        +
+        "\nchannelCount: "
+        +
+        valueText(
+            settings.channelCount
+        )
+        +
+        "  sampleRate: "
+        +
+        valueText(
+            settings.sampleRate
+        )
+        +
+        "\n対応: EC="
+        +
+        valueText(
+            supported.echoCancellation
+        )
+        +
+        " NS="
+        +
+        valueText(
+            supported.noiseSuppression
+        )
+        +
+        " AGC="
+        +
+        valueText(
+            supported.autoGainControl
+        );
+
+}
+
+
+async function setAndroidMicTestMode(
+    mode
+) {
+
+    if (
+        !IS_ANDROID
+    ) {
+
+        return;
+
+    }
+
+
+    androidMicTestMode =
+        mode;
+
+
+    updateAndroidMicSettingsDisplay();
+
+
+    await startMicrophone();
+
+
+    updateAndroidMicSettingsDisplay();
+
+}
+
+
 // ============================================================
 // マイク制約
 // ============================================================
@@ -8875,6 +9368,7 @@ function createAudioConstraints() {
     }
 
 
+    // iOSは従来設定をそのまま維持する。
     if (
         IS_IOS
     ) {
@@ -8915,6 +9409,57 @@ function createAudioConstraints() {
 
             constraints.channelCount =
                 1;
+
+        }
+
+    }
+
+
+    // Androidだけ、診断ボタンで明示的に切り替えた項目をOFFにする。
+    if (
+        IS_ANDROID
+    ) {
+
+        if (
+            (
+                androidMicTestMode === "nsOff"
+                ||
+                androidMicTestMode === "nsAgcOff"
+            )
+            &&
+            supported.noiseSuppression
+        ) {
+
+            constraints.noiseSuppression =
+                false;
+
+        }
+
+
+        if (
+            (
+                androidMicTestMode === "agcOff"
+                ||
+                androidMicTestMode === "nsAgcOff"
+            )
+            &&
+            supported.autoGainControl
+        ) {
+
+            constraints.autoGainControl =
+                false;
+
+        }
+
+
+        if (
+            androidMicTestMode === "ecOff"
+            &&
+            supported.echoCancellation
+        ) {
+
+            constraints.echoCancellation =
+                false;
 
         }
 
@@ -9025,6 +9570,15 @@ async function startMicrophone() {
 
                     }
                 );
+
+
+        if (
+            IS_ANDROID
+        ) {
+
+            updateAndroidMicSettingsDisplay();
+
+        }
 
 
         // iPad第8・9世代の内蔵マイク設定には影響させず、
@@ -9416,6 +9970,37 @@ function stopMicrophoneByUser() {
     );
 
 }
+
+
+
+document
+    .querySelectorAll(
+        "[data-android-mic-mode]"
+    )
+    .forEach(
+        function(button) {
+
+            button.addEventListener(
+                "click",
+                function() {
+
+                    const mode =
+                        button.getAttribute(
+                            "data-android-mic-mode"
+                        )
+                        ||
+                        "current";
+
+
+                    setAndroidMicTestMode(
+                        mode
+                    );
+
+                }
+            );
+
+        }
+    );
 
 
 startButton.addEventListener(
