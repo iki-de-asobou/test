@@ -231,15 +231,21 @@ button {
 
 .android-diagnostic {
     display: none;
-    width: min(100%, 650px);
-    margin: 14px auto 0;
-    padding: 12px 14px;
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid #aaa;
+    position: fixed;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    z-index: 99999;
+    max-height: 46vh;
+    overflow-y: auto;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.97);
+    border: 2px solid #777;
     border-radius: 8px;
+    box-sizing: border-box;
     text-align: left;
-    font-size: 13px;
-    line-height: 1.55;
+    font-size: 12px;
+    line-height: 1.4;
 }
 
 .android-diagnostic.show {
@@ -278,6 +284,16 @@ button {
     padding-top: 7px;
     border-top: 1px solid #ccc;
     font-weight: 700;
+}
+
+.android-diagnostic-history {
+    margin-top: 8px;
+    padding-top: 7px;
+    border-top: 1px solid #ccc;
+    font-family: monospace;
+    white-space: pre-wrap;
+    font-size: 11px;
+    line-height: 1.35;
 }
 
 
@@ -806,6 +822,11 @@ button {
     <div
         id="androidDiagnosticSummary"
         class="android-diagnostic-summary"
+    ></div>
+
+    <div
+        id="androidDiagnosticHistory"
+        class="android-diagnostic-history"
     ></div>
 </div>
 
@@ -1767,6 +1788,18 @@ const androidDiagnosticSummary =
     document.getElementById(
         "androidDiagnosticSummary"
     );
+
+
+const androidDiagnosticHistory =
+    document.getElementById(
+        "androidDiagnosticHistory"
+    );
+
+let androidDiagnosticHistoryLines =
+    [];
+
+let androidDiagnosticLastSnapshotTime =
+    0;
 
 
 const mainFileInput =
@@ -5672,6 +5705,108 @@ function updateAndroidDiagnostic(
         "　持続総合="
         +
         diagnosticMark(holdOK);
+
+
+    // Sが成立して画像が表示されても、直前～成立中の判定を確認できるよう
+    // 約0.25秒ごとに直近8件を固定パネル内へ残す。
+    const now =
+        performance.now();
+
+
+    if (
+        now
+        -
+        androidDiagnosticLastSnapshotTime
+        >=
+        250
+    ) {
+
+        androidDiagnosticLastSnapshotTime =
+            now;
+
+
+        const failedNames =
+            rows
+            .filter(
+                function(row) {
+                    return !row[3];
+                }
+            )
+            .map(
+                function(row) {
+                    return row[0];
+                }
+            );
+
+
+        const historyLine =
+            modeText
+            +
+            " V="
+            +
+            result.volume.toFixed(5)
+            +
+            " HR="
+            +
+            result.highRatio.toFixed(3)
+            +
+            " ZCR="
+            +
+            result.zcr.toFixed(3)
+            +
+            " C="
+            +
+            Math.round(
+                result.spectralCentroid
+            )
+            +
+            " Shape="
+            +
+            diagnosticMark(shape)
+            +
+            " Start="
+            +
+            diagnosticMark(onsetOK)
+            +
+            " Hold="
+            +
+            diagnosticMark(holdOK)
+            +
+            (
+                failedNames.length > 0
+                ?
+                " ×:"
+                +
+                failedNames.join(",")
+                :
+                " 全項目○"
+            );
+
+
+        androidDiagnosticHistoryLines.push(
+            historyLine
+        );
+
+
+        if (
+            androidDiagnosticHistoryLines.length
+            >
+            8
+        ) {
+
+            androidDiagnosticHistoryLines.shift();
+
+        }
+
+
+        androidDiagnosticHistory.textContent =
+            "直近の判定履歴（古い→新しい）\n"
+            +
+            androidDiagnosticHistoryLines.join(
+                "\n"
+            );
+
+    }
 
 }
 
