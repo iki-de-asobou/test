@@ -1,34 +1,9341 @@
 <!doctype html>
 <html lang="ja">
+
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>USB-Cマイク S音テスト</title>
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+>
+
+<title>すーっと！ はつおん</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+    href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Zen+Kaku+Gothic+New:wght@700;900&display=swap"
+    rel="stylesheet"
+>
+
 <style>
-body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;margin:0;background:#f4f8fb;color:#222}.wrap{max-width:820px;margin:0 auto;padding:18px}h1{font-size:26px;margin:8px 0 6px}.note{background:#fff7d6;border-radius:12px;padding:12px 14px;line-height:1.6;margin-bottom:14px}.buttons{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}button{font-size:18px;padding:12px 18px;border:0;border-radius:12px;background:#1677ff;color:white;font-weight:700}button.stop{background:#d83b3b}button:disabled{opacity:.45}.card{background:white;border-radius:14px;padding:14px;margin:12px 0;box-shadow:0 1px 5px rgba(0,0,0,.08)}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}.metric{font-size:18px;padding:7px 0;border-bottom:1px solid #eee}.metric b{float:right;font-variant-numeric:tabular-nums}.status{font-weight:700;font-size:20px}#barOuter{height:28px;background:#e7e7e7;border-radius:14px;overflow:hidden}#bar{height:100%;width:0%;background:#3a9f5b;transition:width .05s linear}pre{white-space:pre-wrap;word-break:break-word;background:#111;color:#e9f1ff;padding:12px;border-radius:10px;font-size:13px}audio{width:100%;margin-top:10px}.small{font-size:14px;color:#555;line-height:1.6}@media(max-width:600px){.grid{grid-template-columns:1fr}h1{font-size:22px}}
+
+:root {
+    --bg: #DDF3FA;
+    --blue: #0057D9;
+    --bar-blue: #1677FF;
+    --bar-red: #F04444;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: #111;
+
+    font-family:
+        "Klee One",
+        "Yu Gothic",
+        "Hiragino Kaku Gothic ProN",
+        "Meiryo",
+        sans-serif;
+
+    font-weight: 700;
+}
+
+button {
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+
+    min-height: 50px;
+
+    padding: 8px 15px;
+
+    border: 1px solid #888;
+    border-radius: 7px;
+
+    background: #f7f7f7;
+}
+
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
+
+.main-layout {
+    max-width: 1100px;
+
+    margin: auto;
+    padding: 20px;
+
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        210px;
+
+    gap: 28px;
+}
+
+.main-left {
+    text-align: center;
+}
+
+.title {
+    position: relative;
+
+    width: fit-content;
+    max-width: 92%;
+
+    margin: 18px auto 24px;
+    padding: 20px 54px 22px;
+
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+
+    background: #FFF5CF;
+    border: 2px solid #E8D89B;
+    border-radius: 50%;
+
+    box-shadow: 0 5px 10px rgba(120, 105, 55, 0.10);
+
+    font-family:
+        "Zen Kaku Gothic New",
+        "Yu Gothic",
+        "Hiragino Kaku Gothic ProN",
+        "Meiryo",
+        sans-serif;
+
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+.title-main,
+.title-sub {
+    position: relative;
+    z-index: 2;
+}
+
+.title-main {
+    color: var(--blue);
+    font-size: 45px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+}
+
+.title-sub {
+    color: #222;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+}
+
+#status {
+    min-height: 34px;
+
+    font-size: 20px;
+}
+
+.image-box {
+    width: min(100%, 650px);
+
+    aspect-ratio: 10 / 7;
+
+    margin: 10px auto;
+
+    background: white;
+
+    border: 1px solid #999;
+
+    display: flex;
+
+    justify-content: center;
+    align-items: center;
+
+    overflow: hidden;
+}
+
+.image-box img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+}
+
+.count {
+    margin-top: 12px;
+
+    font-size: 19px;
+    font-weight: 600;
+}
+
+.side-buttons {
+    padding-top: 50px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 15px;
+}
+
+.side-buttons button {
+    font-size: 18px;
+}
+
+.start-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.start-control #startButton {
+    flex: 1 1 auto;
+}
+
+.recognition-status {
+    display: none;
+
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+
+    color: #555;
+    white-space: nowrap;
+}
+
+.recognition-status.active {
+    display: inline-block;
+}
+
+#displayModeButton,
+#imageOrderButton {
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   Android S判定 診断パネル
+========================================================= */
+
+.android-diagnostic {
+    display: none;
+    width: min(100%, 650px);
+    margin: 14px auto 0;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid #aaa;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.android-diagnostic.show {
+    display: block;
+}
+
+.android-diagnostic-title {
+    margin-bottom: 7px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.android-diagnostic-grid {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 3px 10px;
+    align-items: baseline;
+}
+
+.android-diagnostic-head {
+    font-weight: 700;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 2px;
+}
+
+.android-diagnostic-ok {
+    font-weight: 700;
+}
+
+.android-diagnostic-ng {
+    font-weight: 700;
+}
+
+.android-diagnostic-summary {
+    margin-top: 8px;
+    padding-top: 7px;
+    border-top: 1px solid #ccc;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   トップページ 注意書き
+========================================================= */
+
+.trouble-note {
+    margin: 18px 2px 0;
+
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.7;
+
+    text-align: left;
+
+    color: #555;
+}
+
+
+.page {
+    max-width: 1000px;
+
+    margin: auto;
+
+    text-align: center;
+
+    padding: 30px 18px;
+}
+
+.page h1 {
+    font-size: 36px;
+    font-weight: 600;
+
+    margin: 5px 0 18px;
+}
+
+.description {
+    font-size: 19px;
+    font-weight: 600;
+
+    line-height: 1.7;
+
+    margin: 5px;
+}
+
+
+/* =========================================================
+   母音後続
+========================================================= */
+
+.bar-area {
+    position: relative;
+
+    width: min(92vw, 900px);
+
+    height: 250px;
+
+    margin: 25px auto 5px;
+
+    touch-action: none;
+
+    user-select: none;
+}
+
+.bar-track {
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    top: 80px;
+
+    height: 90px;
+
+    transform-origin: center center;
+
+    transition: transform 0.18s ease;
+}
+
+
+/*
+    鏡モード。
+
+    棒も「いき」「こえ」の文字も
+    全部まとめて左右反転する。
+*/
+.bar-track.mirror {
+    transform: scaleX(-1);
+}
+
+.segment {
+    position: absolute;
+
+    height: 90px;
+
+    top: 0;
+
+    color: white;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 22px;
+    font-weight: 600;
+
+    overflow: hidden;
+}
+
+#blueSegment {
+    background: var(--bar-blue);
+}
+
+#redSegment {
+    background: var(--bar-red);
+}
+
+.bar-line {
+    position: absolute;
+
+    top: -18px;
+
+    width: 5px;
+    height: 126px;
+
+    background: #333;
+
+    transform: translateX(-2px);
+}
+
+.bar-line.middle {
+    top: -22px;
+
+    height: 134px;
+
+    background: white;
+}
+
+.handle {
+    position: absolute;
+
+    top: 101px;
+
+    width: 30px;
+    height: 30px;
+
+    min-height: 0;
+
+    border-radius: 50%;
+
+    border: 2px solid #333;
+
+    background: white;
+
+    transform: translateX(-15px);
+
+    padding: 0;
+
+    z-index: 10;
+}
+
+.vowel-controls {
+    margin: 5px auto 15px;
+
+    display: flex;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+}
+
+.vowel-controls button {
+    min-width: 210px;
+
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   単語練習
+========================================================= */
+
+.word-box {
+    cursor: pointer;
+
+    touch-action: manipulation;
+}
+
+#wordPosition {
+    min-height: 24px;
+
+    color: #555;
+}
+
+/* 単語画像の鏡モード */
+#wordImage {
+    transform-origin: center center;
+    transition: transform 0.18s ease;
+}
+
+#wordImage.mirror {
+    transform: scaleX(-1);
+}
+
+.bottom-buttons {
+    margin-top: 15px;
+
+    display: flex;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+}
+
+.bottom-buttons button {
+    min-width: 145px;
+
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   画像管理
+========================================================= */
+
+.image-manager-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    padding: 18px;
+
+    background: rgba(0, 0, 0, 0.38);
+}
+
+.image-manager-overlay.open {
+    display: flex;
+}
+
+.image-manager-panel {
+    width: min(96vw, 980px);
+    max-height: 92vh;
+
+    overflow: auto;
+
+    padding: 22px;
+
+    background: white;
+    border-radius: 14px;
+
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
+
+.image-manager-panel h2 {
+    margin: 0 0 8px;
+
+    font-size: 28px;
+    font-weight: 600;
+
+    text-align: center;
+}
+
+.image-manager-help {
+    margin: 0 0 18px;
+
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.7;
+
+    text-align: center;
+    color: #555;
+}
+
+.image-manager-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+    gap: 14px;
+}
+
+.image-manager-card {
+    padding: 9px;
+
+    border: 2px solid #ddd;
+    border-radius: 10px;
+
+    background: #fafafa;
+}
+
+.image-manager-card.selected {
+    border-color: #1677FF;
+    background: #EEF6FF;
+}
+
+.image-manager-thumb {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+
+    display: block;
+
+    object-fit: contain;
+
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.image-manager-number {
+    margin: 6px 0 4px;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    text-align: center;
+}
+
+.image-manager-select {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    min-height: 34px;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.image-manager-select input {
+    width: 20px;
+    height: 20px;
+}
+
+.image-manager-move {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+
+    margin-top: 6px;
+}
+
+.image-manager-move button {
+    min-height: 40px;
+    padding: 5px 7px;
+
+    font-size: 13px;
+}
+
+.image-manager-actions {
+    margin-top: 20px;
+
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.image-manager-actions button {
+    min-width: 170px;
+}
+
+#deleteSelectedImagesButton {
+    border-color: #C73B3B;
+}
+
+.image-manager-empty {
+    grid-column: 1 / -1;
+
+    padding: 30px 10px;
+
+    text-align: center;
+    color: #666;
+}
+
+
+.copyright {
+    margin-top: 28px;
+    text-align: center;
+    font-size: 13px;
+    color: #555;
+}
+
+
+/* =========================================================
+   スマホ・iPad等
+========================================================= */
+
+@media (max-width: 760px) {
+
+    .main-layout {
+        grid-template-columns: 1fr;
+
+        padding: 12px;
+    }
+
+    .side-buttons {
+        padding-top: 5px;
+
+        display: grid;
+
+        grid-template-columns:
+            1fr 1fr;
+
+        gap: 10px;
+    }
+
+    .start-control,
+    #displayModeButton,
+    #imageOrderButton {
+        grid-column: 1 / -1;
+    }
+
+    .trouble-note {
+        grid-column: 1 / -1;
+
+        margin-top: 8px;
+        padding: 0 4px;
+
+        font-size: 12px;
+    }
+
+    .title {
+        max-width: 94%;
+        gap: 5px 9px;
+        margin-top: 20px;
+        margin-bottom: 22px;
+        padding: 15px 30px 17px;
+    }
+
+
+    .title-main {
+        font-size: 33px;
+    }
+
+    .title-sub {
+        font-size: 23px;
+    }
+
+    .page h1 {
+        font-size: 30px;
+    }
+
+    .description {
+        font-size: 17px;
+    }
+}
+
 </style>
+
 </head>
+
+
 <body>
-<div class="wrap">
-<h1>USB-Cマイク「すーー」入力テスト</h1>
-<div class="note">まずUSB-Cマイクを接続してからこのページを開いてください。<br><b>① 無音2秒 → ②「すーーーー」を5秒くらい → ③ 無音</b> の順で試します。<br>今は画像判定ではなく、SafariまでS音が持続して届くかだけを確認します。</div>
-<div class="buttons"><button id="startBtn">マイク開始</button><button id="recordBtn" disabled>10秒録音</button><button id="stopBtn" class="stop" disabled>停止</button></div>
-<div class="card"><div class="status" id="status">未開始</div><div style="margin-top:12px" id="barOuter"><div id="bar"></div></div></div>
-<div class="card"><div class="grid"><div class="metric">Volume (RMS) <b id="volume">-</b></div><div class="metric">Peak <b id="peak">-</b></div><div class="metric">High Ratio ≥4kHz <b id="highRatio">-</b></div><div class="metric">Centroid <b id="centroid">-</b></div><div class="metric">ZCR <b id="zcr">-</b></div><div class="metric">Sample rate <b id="sampleRate">-</b></div></div></div>
-<div class="card"><b>現在の入力トラック</b><pre id="trackInfo">まだ取得していません。</pre><div class="small">※ iPad/Safariでは、ここにUSB-Cマイクの商品名が必ず表示されるとは限りません。録音結果と数値の持続性を最優先で見ます。</div></div>
-<div class="card"><b>録音結果</b><div id="timer" style="margin-top:8px;font-size:20px;">-</div><audio id="player" controls></audio><div class="small">録音後、再生して「すーーーー」が最初だけでなく最後まで聞こえるか確認してください。</div></div>
-<div class="card"><b>簡易ログ（約0.25秒ごと）</b><pre id="log">録音中にここへ数値を記録します。</pre></div>
+
+
+<!-- =========================================================
+     メイン
+========================================================= -->
+
+<section
+    id="mainScreen"
+    class="screen active"
+>
+
+<div class="main-layout">
+
+
+<div class="main-left">
+
+<div class="title">
+
+<span class="title-main">
+すーっと！
+</span>
+
+<span class="title-sub">
+はつおん
+</span>
+
 </div>
+
+
+<div id="status"></div>
+
+
+<div class="image-box">
+
+<img
+    id="mainImage"
+    alt=""
+>
+
+</div>
+
+
+<div
+    id="mainCount"
+    class="count"
+>
+登録画像：0 / 20
+</div>
+
+
+<div
+    id="androidDiagnostic"
+    class="android-diagnostic"
+    aria-live="polite"
+>
+    <div class="android-diagnostic-title">
+        Android S判定 診断
+    </div>
+
+    <div
+        id="androidDiagnosticGrid"
+        class="android-diagnostic-grid"
+    ></div>
+
+    <div
+        id="androidDiagnosticSummary"
+        class="android-diagnostic-summary"
+    ></div>
+</div>
+
+</div>
+
+
+<div class="side-buttons">
+
+<div class="start-control">
+
+<button id="startButton">
+スタート
+</button>
+
+<span
+    id="recognitionStatus"
+    class="recognition-status"
+    aria-live="polite"
+>
+音声認識中
+</span>
+
+</div>
+
+<button id="registerMainButton">
+画像を登録
+</button>
+
+<button id="clearMainButton">
+画像をクリア
+</button>
+
+<button id="manageMainButton">
+画像を管理
+</button>
+
+<button id="displayModeButton">
+表示モード：s音の間だけ
+</button>
+
+<button id="imageOrderButton">
+表示順：ランダム
+</button>
+
+<button id="vowelButton">
+母音後続
+</button>
+
+<button id="wordButton">
+単語練習
+</button>
+
+
+<p class="trouble-note">
+画像が変わらなくなるなど、不具合が生じた際は「停止」→「スタート」を押すか、ページを再読み込みしてください。
+</p>
+
+</div>
+
+
+</div>
+
+<p class="copyright">
+© 2026 Makoto Dote
+</p>
+
+</section>
+
+
+
+<!-- =========================================================
+     母音後続
+========================================================= -->
+
+<section
+    id="vowelScreen"
+    class="screen"
+>
+
+<div class="page">
+
+<h1>
+母音後続
+</h1>
+
+
+<p class="description">
+棒の左端・青と赤の境目・右端を動かせます。
+</p>
+
+
+<p class="description">
+息と声をつなげ、音節（さすせそ）の練習をしましょう。
+</p>
+
+<p class="description">
+（「し」は子音が異なります。）
+</p>
+
+<p class="description">
+他の行音の練習にも使用できます。
+</p>
+
+<div class="vowel-controls">
+
+<button id="mirrorButton">
+左右反転（鏡に映す）：OFF
+</button>
+
+</div>
+
+
+<div
+    id="barArea"
+    class="bar-area"
+>
+
+
+<div
+    id="barTrack"
+    class="bar-track"
+>
+
+
+<div
+    id="blueSegment"
+    class="segment"
+>
+いき
+</div>
+
+
+<div
+    id="redSegment"
+    class="segment"
+>
+こえ
+</div>
+
+
+<div
+    id="leftLine"
+    class="bar-line"
+></div>
+
+<div
+    id="middleLine"
+    class="bar-line middle"
+></div>
+
+<div
+    id="rightLine"
+    class="bar-line"
+></div>
+
+
+<button
+    id="leftHandle"
+    class="handle"
+    aria-label="左端"
+></button>
+
+
+<button
+    id="middleHandle"
+    class="handle"
+    aria-label="青と赤の境目"
+></button>
+
+
+<button
+    id="rightHandle"
+    class="handle"
+    aria-label="右端"
+></button>
+
+
+</div>
+
+</div>
+
+
+<div class="bottom-buttons">
+
+<button id="vowelBackButton">
+もどる
+</button>
+
+</div>
+
+
+</div>
+
+</section>
+
+
+
+<!-- =========================================================
+     単語練習
+========================================================= -->
+
+<section
+    id="wordScreen"
+    class="screen"
+>
+
+<div class="page">
+
+<h1>
+単語練習
+</h1>
+
+
+<p class="description">
+「さすせそ」を含む単語のイラストや写真を登録してください。
+<br>
+クリックまたはタップすると順番に表示されます。
+</p>
+
+<p class="description">
+他の行音の練習にも使用できます。
+</p>
+
+<div
+    id="wordImageBox"
+    class="image-box word-box"
+    tabindex="0"
+>
+
+<img
+    id="wordImage"
+    alt=""
+>
+
+</div>
+
+
+<div
+    id="wordCount"
+    class="count"
+>
+登録画像：0 / 20
+</div>
+
+
+<div id="wordPosition"></div>
+
+
+<div class="bottom-buttons">
+
+<button id="registerWordButton">
+画像を登録
+</button>
+
+<button id="clearWordButton">
+画像をクリア
+</button>
+
+<button id="manageWordButton">
+画像を管理
+</button>
+
+<button id="wordMirrorButton">
+左右反転（鏡に映す）：OFF
+</button>
+
+<button id="wordBackButton">
+もどる
+</button>
+
+</div>
+
+
+</div>
+
+</section>
+
+
+
+<!-- =========================================================
+     画像管理
+========================================================= -->
+
+<div
+    id="imageManagerOverlay"
+    class="image-manager-overlay"
+    aria-hidden="true"
+>
+
+<div class="image-manager-panel">
+
+<h2 id="imageManagerTitle">
+画像を管理
+</h2>
+
+<p class="image-manager-help">
+削除したい画像にチェックを入れてください。<br>
+「前へ」「後へ」で表示される順番を変更できます。
+</p>
+
+<div
+    id="imageManagerGrid"
+    class="image-manager-grid"
+></div>
+
+<div class="image-manager-actions">
+
+<button id="deleteSelectedImagesButton">
+選択した画像を削除
+</button>
+
+<button id="closeImageManagerButton">
+もどる
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<input
+    id="mainFileInput"
+    type="file"
+    accept="image/*"
+    multiple
+    hidden
+>
+
+
+<input
+    id="wordFileInput"
+    type="file"
+    accept="image/*"
+    multiple
+    hidden
+>
+
+
+
 <script>
-let stream=null,audioContext=null,analyser=null,source=null,rafId=null,recorder=null,chunks=[],recording=false,recordStart=0,recordTimer=null,logTimer=null,latest=null;
-const $=id=>document.getElementById(id);
-function chooseMimeType(){const c=['audio/mp4','audio/webm;codecs=opus','audio/webm'];if(!window.MediaRecorder)return'';for(const t of c){if(MediaRecorder.isTypeSupported&&MediaRecorder.isTypeSupported(t))return t}return''}
-async function startMic(){try{$('status').textContent='マイク取得中…';stream=await navigator.mediaDevices.getUserMedia({audio:true});audioContext=new(window.AudioContext||window.webkitAudioContext)();if(audioContext.state==='suspended')await audioContext.resume();source=audioContext.createMediaStreamSource(stream);analyser=audioContext.createAnalyser();analyser.fftSize=4096;analyser.smoothingTimeConstant=.15;source.connect(analyser);const track=stream.getAudioTracks()[0],settings=track.getSettings?track.getSettings():{};$('trackInfo').textContent='label: '+(track.label||'(表示なし)')+'\n'+JSON.stringify(settings,null,2);$('sampleRate').textContent=audioContext.sampleRate+' Hz';$('status').textContent='入力中：無音 → すーーーー を試してください';$('startBtn').disabled=true;$('recordBtn').disabled=false;$('stopBtn').disabled=false;analyseLoop()}catch(err){$('status').textContent='マイク取得エラー';$('trackInfo').textContent=String(err&&err.stack?err.stack:err)}}
-function analyseLoop(){if(!analyser||!audioContext)return;const time=new Float32Array(analyser.fftSize);analyser.getFloatTimeDomainData(time);let sumSq=0,peak=0,crossings=0;for(let i=0;i<time.length;i++){const v=time[i];sumSq+=v*v;const a=Math.abs(v);if(a>peak)peak=a;if(i>0&&((time[i-1]>=0&&v<0)||(time[i-1]<0&&v>=0)))crossings++}const rms=Math.sqrt(sumSq/time.length),zcr=crossings/(time.length-1);const freq=new Float32Array(analyser.frequencyBinCount);analyser.getFloatFrequencyData(freq);const sr=audioContext.sampleRate,binHz=sr/analyser.fftSize;let totalPower=0,highPower=0,weighted=0;for(let i=1;i<freq.length;i++){const p=Math.pow(10,freq[i]/10),hz=i*binHz;totalPower+=p;weighted+=hz*p;if(hz>=4000)highPower+=p}const highRatio=totalPower>0?highPower/totalPower:0,centroid=totalPower>0?weighted/totalPower:0;latest={rms,peak,highRatio,centroid,zcr};$('volume').textContent=rms.toFixed(6);$('peak').textContent=peak.toFixed(6);$('highRatio').textContent=highRatio.toFixed(3);$('centroid').textContent=Math.round(centroid)+' Hz';$('zcr').textContent=zcr.toFixed(3);$('bar').style.width=Math.min(100,Math.max(0,rms*5000))+'%';rafId=requestAnimationFrame(analyseLoop)}
-function startRecording(){if(!stream||recording)return;if(!window.MediaRecorder){alert('このSafariではMediaRecorderが利用できません。');return}chunks=[];$('log').textContent='';$('player').removeAttribute('src');const mime=chooseMimeType();try{recorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream)}catch(e){recorder=new MediaRecorder(stream)}recorder.ondataavailable=e=>{if(e.data&&e.data.size>0)chunks.push(e.data)};recorder.onstop=()=>{const type=recorder.mimeType||mime||'audio/mp4',blob=new Blob(chunks,{type}),url=URL.createObjectURL(blob);$('player').src=url;$('status').textContent='録音終了。再生して「すーー」が最後まで残るか確認してください。'};recorder.start(250);recording=true;recordStart=performance.now();$('recordBtn').disabled=true;$('status').textContent='10秒録音中：無音2秒 → すーーーー5秒 → 無音';$('timer').textContent='0.0 / 10.0 秒';recordTimer=setInterval(()=>{const sec=(performance.now()-recordStart)/1000;$('timer').textContent=Math.min(sec,10).toFixed(1)+' / 10.0 秒';if(sec>=10)stopRecordingOnly()},100);logTimer=setInterval(()=>{if(!latest)return;const sec=(performance.now()-recordStart)/1000;const line=sec.toFixed(2)+'s  vol='+latest.rms.toFixed(6)+'  peak='+latest.peak.toFixed(6)+'  HR='+latest.highRatio.toFixed(3)+'  cent='+Math.round(latest.centroid)+'  ZCR='+latest.zcr.toFixed(3);$('log').textContent+=line+'\n';$('log').scrollTop=$('log').scrollHeight},250)}
-function stopRecordingOnly(){if(!recording)return;recording=false;clearInterval(recordTimer);clearInterval(logTimer);recordTimer=null;logTimer=null;if(recorder&&recorder.state!=='inactive')recorder.stop();$('recordBtn').disabled=false;$('timer').textContent='10.0 / 10.0 秒'}
-function stopAll(){stopRecordingOnly();if(rafId)cancelAnimationFrame(rafId);rafId=null;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}if(audioContext){audioContext.close().catch(()=>{});audioContext=null}analyser=null;source=null;$('status').textContent='停止しました';$('startBtn').disabled=false;$('recordBtn').disabled=true;$('stopBtn').disabled=true}
-$('startBtn').addEventListener('click',startMic);$('recordBtn').addEventListener('click',startRecording);$('stopBtn').addEventListener('click',stopAll);
+
+"use strict";
+
+
+// ============================================================
+// 基本
+// ============================================================
+
+const MAX_MAIN_IMAGES = 20;
+const MAX_WORD_IMAGES = 20;
+
+
+// ============================================================
+// 練習モード
+// ============================================================
+
+// 現在は「すーっと！」モードのみ。
+// 以前「ふーっと！」を選んでいた端末でも、必ずSモードで開始する。
+const PRACTICE_MODE_STORAGE_KEY =
+    "IkiDeAsobouPracticeMode";
+
+let practiceMode =
+    "s";
+
+localStorage.setItem(
+    PRACTICE_MODE_STORAGE_KEY,
+    practiceMode
+);
+
+
+// ============================================================
+// 表示モード
+// ============================================================
+
+const DISPLAY_MODE_STORAGE_KEY =
+    "IkiDeAsobouDisplayMode";
+
+
+let displayMode =
+    localStorage.getItem(
+        DISPLAY_MODE_STORAGE_KEY
+    );
+
+
+if (
+    displayMode !== "during"
+    &&
+    displayMode !== "untilNext"
+) {
+
+    displayMode =
+        "during";
+
+}
+
+
+// ============================================================
+// トップ画像の表示順
+// ============================================================
+
+const IMAGE_ORDER_STORAGE_KEY =
+    "IkiDeAsobouImageOrder";
+
+
+let imageOrderMode =
+    localStorage.getItem(
+        IMAGE_ORDER_STORAGE_KEY
+    );
+
+
+if (
+    imageOrderMode !== "random"
+    &&
+    imageOrderMode !== "sequential"
+) {
+
+    imageOrderMode =
+        "random";
+
+}
+
+
+let mainSequentialIndex =
+    0;
+
+
+// ============================================================
+// 母音後続 鏡モード
+// ============================================================
+
+const MIRROR_MODE_STORAGE_KEY =
+    "IkiDeAsobouMirrorMode";
+
+
+let mirrorMode =
+    localStorage.getItem(
+        MIRROR_MODE_STORAGE_KEY
+    )
+    ===
+    "true";
+
+
+// ============================================================
+// 単語 鏡モード
+// ============================================================
+
+const WORD_MIRROR_MODE_STORAGE_KEY =
+    "IkiDeAsobouWordMirrorMode";
+
+
+let wordMirrorMode =
+    localStorage.getItem(
+        WORD_MIRROR_MODE_STORAGE_KEY
+    )
+    ===
+    "true";
+
+
+// ============================================================
+// 共通 S開始判定
+// ============================================================
+
+const HIGH_RATIO_MIN =
+    0.38;
+
+const ZCR_MIN =
+    0.025;
+
+const PEAK_RATIO_LIMIT =
+    4.5;
+
+const PEAK_LIMIT =
+    0.085;
+
+
+const NORMAL_MIN_VOLUME =
+    0.0045;
+
+const NORMAL_REQUIRED =
+    2;
+
+
+const WEAK_MIN_VOLUME =
+    0.0035;
+
+const WEAK_REQUIRED =
+    4;
+
+
+const CALIBRATION_SECONDS =
+    1.0;
+
+
+// ============================================================
+// 端末
+// ============================================================
+
+const USER_AGENT =
+    navigator.userAgent || "";
+
+
+const IS_ANDROID =
+    /Android/i.test(
+        USER_AGENT
+    );
+
+
+const IS_IOS =
+    /iPad|iPhone|iPod/i.test(
+        USER_AGENT
+    )
+    ||
+    (
+        navigator.maxTouchPoints > 1
+        &&
+        /Macintosh/i.test(
+            USER_AGENT
+        )
+    )
+    ||
+    (
+        navigator.platform === "MacIntel"
+        &&
+        navigator.maxTouchPoints > 1
+    );
+
+
+// ============================================================
+// Android
+// ============================================================
+
+// ============================================================
+// Android S感度調整
+// ============================================================
+//
+// iOSやPCには影響させず、Androidだけ
+// ・弱いSの開始
+// ・開始後の持続
+// を拾いやすくする。
+
+const ANDROID_WEAK_MIN_VOLUME =
+    0.0020;
+
+const ANDROID_WEAK_NOISE_MULTIPLIER =
+    1.06;
+
+const ANDROID_WEAK_NOISE_ADD =
+    0.00015;
+
+// Android騒音対策：noiseFloor追従で開始閾値が上がりすぎないよう上限を設ける。
+// Sらしさの周波数条件・ふー除外は従来どおり維持する。
+const ANDROID_WEAK_NOISE_CAP =
+    0.0035;
+
+const ANDROID_WEAK_REQUIRED =
+    3;
+
+
+// Android：開始後の弱いSを保持しやすくする。
+const ANDROID_HOLD_MIN_VOLUME =
+    0.0010;
+
+const ANDROID_HOLD_NOISE_MULTIPLIER =
+    1.06;
+
+const ANDROID_HOLD_NOISE_ADD =
+    0.00012;
+
+// Android騒音対策：開始後の保持閾値にも上限を設ける。
+const ANDROID_HOLD_NOISE_CAP =
+    0.0025;
+
+const ANDROID_HOLD_HIGH_RATIO_MIN =
+    0.25;
+
+const ANDROID_HOLD_ZCR_MIN =
+    0.012;
+
+// Sらしい音が一時的に崩れた場合は、従来どおり少し長めに待つ。
+const ANDROID_RELEASE_SECONDS =
+    0.60;
+
+// ほぼ無音まで落ちた場合だけ、より早く画像を消す。
+const ANDROID_SILENCE_RELEASE_SECONDS =
+    0.18;
+
+
+// ============================================================
+// PC
+// ============================================================
+
+const PC_HOLD_HIGH_RATIO_MIN =
+    0.30;
+
+const PC_HOLD_ZCR_MIN =
+    0.017;
+
+const PC_SOFT_RELEASE_SECONDS =
+    0.50;
+
+const PC_SILENCE_RELEASE_SECONDS =
+    0.18;
+
+const PC_ONSET_EXTRA_FRAMES =
+    2;
+
+
+// ============================================================
+// iPad / iPhone
+// ============================================================
+
+// iPad第9世代 S開始感度テスト。
+// 通常のS音量しきい値は変えず、iOSの弱音経路だけ開始音量を下げる。
+// 実際の開始時に 0.0008～0.0009 前後しか届かないケースに対応。
+// 第9世代で、より弱い自然な「すー」にも入りやすくする微調整。
+// もう一段だけ弱い自然な「すー」から開始しやすくする。
+// iPad第9世代：自然な距離・弱いSでも開始しやすくする追加調整。
+// iPad第9世代：自然な距離で、さらに弱いSでも開始しやすくする追加調整。
+// iPad第9世代：自然な距離で、さらに弱いSから開始しやすくする。
+// iPad第9世代：自然な距離で、さらに弱いSから開始しやすくする。
+// iPad第9世代：自然な距離で、さらに弱いSから開始しやすくする。
+// iPad第9世代：自然な距離で、さらに弱いSから開始しやすくする。
+// iPad第9世代：50cm程度の自然な距離からの弱いSを狙う試験値。
+const IOS_WEAK_MIN_VOLUME =
+    0.00020;
+
+const IOS_WEAK_REQUIRED =
+    12;
+
+// iPad / iPhone は、通常の強さのSでも
+// Sらしい形が約200ms続いてから開始とする。
+// 「s成分＋ふ」の誤発音が、最初のs成分だけで
+// 先にラッチしてしまうのをさらに防ぐ。
+const IOS_NORMAL_REQUIRED =
+    12;
+
+// iPad + USB-C外部マイク専用。
+// 実測では弱いSでも High Ratio / Centroid / ZCR が十分Sらしいため、
+// S形状条件は維持したまま「開始までの待ち時間」だけ短くする。
+const IOS_USB_S_REQUIRED =
+    2;
+
+// iPad + USB-C外部マイク専用の弱いS開始音量。
+// 実測：無音 約0.0018、弱めS 約0.020。
+// その中間に十分な余裕を持たせ、0.010から拾う。
+// 内蔵マイク用の iosWeakDynamicMin は変更しない。
+// 厳しいS形状条件も同時に満たした場合だけ開始候補になる。
+const IOS_USB_WEAK_MIN_VOLUME =
+    0.010;
+
+const IOS_USB_WEAK_NOISE_MULTIPLIER =
+    1.00;
+
+
+// iPad / iPhone の「ふー」除外。
+// 「ふー」を後から除外するだけでなく、S開始時に
+// 高域へ十分にエネルギーが集まっていることを確認する。
+// 音量しきい値は変えず、弱いSへの感度はできるだけ維持する。
+const IOS_BREATH_REQUIRED =
+    2;
+
+const IOS_S_SHAPE_HIGH_RATIO_MIN =
+    0.60;
+
+const IOS_S_SHAPE_CENTROID_MIN =
+    6000;
+
+const IOS_S_SHAPE_UPPER_HIGH_MIN =
+    0.27;
+
+const IOS_S_SHAPE_UPPER_TO_LOWMID_MIN =
+    1.25;
+
+const IOS_S_SHAPE_ZCR_MIN =
+    0.065;
+
+const IOS_S_SHAPE_UPPER_SHARE_MIN =
+    0.45;
+
+// さらに「ふー」と混合音を分けるため、
+// /s/で出やすい8kHz以上を直接確認する。
+const IOS_S_SHAPE_VERY_HIGH_MIN =
+    0.12;
+
+const IOS_S_SHAPE_VERY_HIGH_TO_MID_MIN =
+    1.00;
+
+// 8kHz以上が、高域全体の中でも十分な割合を占めることを確認する。
+// 大きな「ふー」や「s＋ふ」が一部だけ高域を持っていても、
+// /s/ほど上側へ集中していない場合は開始させない。
+const IOS_S_SHAPE_VERY_HIGH_SHARE_MIN =
+    0.22;
+
+
+const IOS_HOLD_HIGH_RATIO_MIN =
+    0.28;
+
+const IOS_HOLD_ZCR_MIN =
+    0.015;
+
+
+const IOS_REFERENCE_BUILD_SECONDS =
+    0.25;
+
+const IOS_RELEASE_RATIO =
+    0.35;
+
+const IOS_RELEASE_ABSOLUTE =
+    0.0022;
+
+const IOS_RELEASE_NOISE_MULTIPLIER =
+    1.30;
+
+const IOS_RELEASE_NOISE_ADD =
+    0.00055;
+
+const IOS_RELEASE_SECONDS =
+    0.20;
+
+// 弱いSで一瞬だけ周波数条件が崩れても、すぐには画像を消さない。
+const IOS_SPECTRAL_RELEASE_SECONDS =
+    0.55;
+
+const IOS_INITIAL_PROTECTION_SECONDS =
+    0.30;
+
+
+// ============================================================
+// iPad / iPhone 低音量S追跡（試験版）
+// ============================================================
+//
+// 第9世代では「すー」の開始直後は十分な音量がある一方、
+// 継続中にSafariへ届く音量だけが大きく下がることがある。
+// そのため、最初に通常のS判定を満たしたことを確認した後だけ、
+// 非常にSらしい高域形状が続く間は低音量でも候補・継続を許可する。
+// 無音から直接この経路へ入ることはできない。
+// iPad第9世代：弱いSの持続中にSafari側でさらに音量が落ちても
+// Sらしい高域形状が続く限り保持しやすくする。
+const IOS_S_LOW_VOLUME_MIN =
+    0.00018;
+
+const IOS_S_LOW_NOISE_MULTIPLIER =
+    0.75;
+
+const IOS_S_LOW_NOISE_ADD =
+    0.000000;
+
+const IOS_S_LOW_HIGH_RATIO_MIN =
+    0.70;
+
+const IOS_S_LOW_CENTROID_MIN =
+    6500;
+
+const IOS_S_LOW_UPPER_HIGH_MIN =
+    0.35;
+
+const IOS_S_LOW_ZCR_MIN =
+    0.080;
+
+const IOS_S_LOW_VERY_HIGH_MIN =
+    0.18;
+
+const IOS_S_SEED_REQUIRED =
+    2;
+
+
+// ============================================================
+// ふーっと！モード
+// ============================================================
+
+// 「すーっと！」の判定値は一切変更せず、
+// 息の練習専用の別判定として扱う。
+// 弱い呼気にも反応しやすいよう、開始音量は
+// 周囲雑音に対して少し上回る程度にする。
+const BREATH_MIN_VOLUME =
+    0.00070;
+
+const BREATH_NOISE_MULTIPLIER =
+    1.020;
+
+const BREATH_NOISE_ADD =
+    0.00004;
+
+const BREATH_HIGH_RATIO_MIN =
+    0.10;
+
+const BREATH_ZCR_MIN =
+    0.018;
+
+const BREATH_CENTROID_MIN =
+    1700;
+
+const BREATH_PEAK_RATIO_LIMIT =
+    5.5;
+
+const BREATH_PEAK_LIMIT =
+    0.10;
+
+// 息らしい音が数フレーム連続したときだけ開始。
+// 声や一瞬の物音への誤反応を減らす。
+const BREATH_REQUIRED =
+    4;
+
+// 継続中は開始条件よりさらに緩くする。
+const BREATH_HOLD_MIN_VOLUME =
+    0.00035;
+
+const BREATH_HOLD_NOISE_MULTIPLIER =
+    1.005;
+
+const BREATH_HOLD_NOISE_ADD =
+    0.00001;
+
+const BREATH_RELEASE_SECONDS =
+    0.30;
+
+
+// iPad / iPhone の「ふーっと！」だけ追加調整。
+// 弱い息への開始感度は維持しつつ、
+// ・声だけの入力を開始しにくくする
+// ・息が止まったら早めに終了する
+// ための端末別判定。
+const IOS_BREATH_RELEASE_SECONDS =
+    0.42;
+
+const IOS_BREATH_REFERENCE_BUILD_SECONDS =
+    0.22;
+
+const IOS_BREATH_RELEASE_RATIO =
+    0.40;
+
+const IOS_BREATH_RELEASE_NOISE_MULTIPLIER =
+    1.055;
+
+const IOS_BREATH_RELEASE_NOISE_ADD =
+    0.00007;
+
+
+// iPad / iPhone の「ふーっと！」開始判定。
+// 弱い息への感度をかなり高く保ちつつ、
+// 一瞬の接触音・物音は連続時間とピーク形状で除外する。
+// 「ふーっと！」も弱い呼気で開始しやすくする微調整。
+// もう一段だけ弱い「ふー」から開始しやすくする。
+const IOS_BREATH_MIN_VOLUME =
+    0.00032;
+
+const IOS_BREATH_NOISE_MULTIPLIER =
+    1.003;
+
+const IOS_BREATH_NOISE_ADD =
+    0.000008;
+
+const IOS_BREATH_HIGH_RATIO_MIN =
+    0.045;
+
+const IOS_BREATH_ZCR_MIN =
+    0.006;
+
+const IOS_BREATH_CENTROID_MIN =
+    900;
+
+const IOS_BREATH_PEAK_RATIO_LIMIT =
+    6.8;
+
+const IOS_BREATH_PEAK_LIMIT =
+    0.12;
+
+// 約80ms前後の連続した息らしさを要求。
+// 感度を音量では落とさず、短い物音だけを切る狙い。
+const IOS_BREATH_MODE_REQUIRED =
+    4;
+
+
+// ============================================================
+// Watchdog
+// ============================================================
+
+const AUDIO_STALL_MS =
+    1500;
+
+
+// ============================================================
+// DOM
+// ============================================================
+
+const mainScreen =
+    document.getElementById(
+        "mainScreen"
+    );
+
+
+const vowelScreen =
+    document.getElementById(
+        "vowelScreen"
+    );
+
+
+const wordScreen =
+    document.getElementById(
+        "wordScreen"
+    );
+
+
+const statusElement =
+    document.getElementById(
+        "status"
+    );
+
+
+const startButton =
+    document.getElementById(
+        "startButton"
+    );
+
+
+const recognitionStatus =
+    document.getElementById(
+        "recognitionStatus"
+    );
+
+
+const displayModeButton =
+    document.getElementById(
+        "displayModeButton"
+    );
+
+
+const imageOrderButton =
+    document.getElementById(
+        "imageOrderButton"
+    );
+
+
+const mainImage =
+    document.getElementById(
+        "mainImage"
+    );
+
+
+const mainCount =
+    document.getElementById(
+        "mainCount"
+    );
+
+
+const androidDiagnostic =
+    document.getElementById(
+        "androidDiagnostic"
+    );
+
+const androidDiagnosticGrid =
+    document.getElementById(
+        "androidDiagnosticGrid"
+    );
+
+const androidDiagnosticSummary =
+    document.getElementById(
+        "androidDiagnosticSummary"
+    );
+
+
+const mainFileInput =
+    document.getElementById(
+        "mainFileInput"
+    );
+
+
+const wordImage =
+    document.getElementById(
+        "wordImage"
+    );
+
+
+const wordImageBox =
+    document.getElementById(
+        "wordImageBox"
+    );
+
+
+const wordCount =
+    document.getElementById(
+        "wordCount"
+    );
+
+
+const wordPosition =
+    document.getElementById(
+        "wordPosition"
+    );
+
+
+const wordFileInput =
+    document.getElementById(
+        "wordFileInput"
+    );
+
+
+const wordMirrorButton =
+    document.getElementById(
+        "wordMirrorButton"
+    );
+
+
+const imageManagerOverlay =
+    document.getElementById(
+        "imageManagerOverlay"
+    );
+
+
+const imageManagerTitle =
+    document.getElementById(
+        "imageManagerTitle"
+    );
+
+
+const imageManagerGrid =
+    document.getElementById(
+        "imageManagerGrid"
+    );
+
+
+const deleteSelectedImagesButton =
+    document.getElementById(
+        "deleteSelectedImagesButton"
+    );
+
+
+// ============================================================
+// 表示モード
+// ============================================================
+
+function updateDisplayModeButton() {
+
+    const targetName =
+        "s音";
+
+
+    if (
+        displayMode === "during"
+    ) {
+
+        displayModeButton.textContent =
+            "表示モード："
+            +
+            targetName
+            +
+            "の間だけ";
+
+    }
+
+    else {
+
+        displayModeButton.textContent =
+            "表示モード：次の"
+            +
+            targetName
+            +
+            "まで";
+
+    }
+
+}
+
+
+displayModeButton.addEventListener(
+    "click",
+    function() {
+
+        if (
+            displayMode === "during"
+        ) {
+
+            displayMode =
+                "untilNext";
+
+        }
+
+        else {
+
+            displayMode =
+                "during";
+
+        }
+
+
+        localStorage.setItem(
+            DISPLAY_MODE_STORAGE_KEY,
+            displayMode
+        );
+
+
+        updateDisplayModeButton();
+
+
+        if (
+            displayMode === "during"
+            &&
+            !soundLatched
+        ) {
+
+            clearImageElement(
+                mainImage
+            );
+
+        }
+
+    }
+);
+
+
+// ============================================================
+// トップ画像の表示順
+// ============================================================
+
+function updateImageOrderButton() {
+
+    if (
+        imageOrderMode === "random"
+    ) {
+
+        imageOrderButton.textContent =
+            "表示順：ランダム";
+
+    }
+
+    else {
+
+        imageOrderButton.textContent =
+            "表示順：順番";
+
+    }
+
+}
+
+
+imageOrderButton.addEventListener(
+    "click",
+    function() {
+
+        if (
+            imageOrderMode === "random"
+        ) {
+
+            imageOrderMode =
+                "sequential";
+
+            mainSequentialIndex =
+                0;
+
+        }
+
+        else {
+
+            imageOrderMode =
+                "random";
+
+        }
+
+
+        localStorage.setItem(
+            IMAGE_ORDER_STORAGE_KEY,
+            imageOrderMode
+        );
+
+
+        updateImageOrderButton();
+
+    }
+);
+
+
+// ============================================================
+// 画面
+// ============================================================
+
+function showScreen(target) {
+
+    mainScreen.classList.remove(
+        "active"
+    );
+
+    vowelScreen.classList.remove(
+        "active"
+    );
+
+    wordScreen.classList.remove(
+        "active"
+    );
+
+
+    target.classList.add(
+        "active"
+    );
+
+}
+
+
+// ============================================================
+// IndexedDB
+// ============================================================
+
+const DB_NAME =
+    "IkiDeAsobouDB";
+
+
+const DB_VERSION =
+    1;
+
+
+const STORE_MAIN =
+    "mainImages";
+
+
+const STORE_WORD =
+    "wordImages";
+
+
+let database =
+    null;
+
+
+let mainImages =
+    [];
+
+
+let wordImages =
+    [];
+
+
+let wordIndex =
+    0;
+
+
+// ============================================================
+// DB
+// ============================================================
+
+function openDatabase() {
+
+    return new Promise(
+        function(resolve, reject) {
+
+            const request =
+                indexedDB.open(
+                    DB_NAME,
+                    DB_VERSION
+                );
+
+
+            request.onupgradeneeded =
+                function() {
+
+                    const db =
+                        request.result;
+
+
+                    if (
+                        !db.objectStoreNames.contains(
+                            STORE_MAIN
+                        )
+                    ) {
+
+                        db.createObjectStore(
+                            STORE_MAIN,
+                            {
+                                keyPath: "id",
+                                autoIncrement: true
+                            }
+                        );
+
+                    }
+
+
+                    if (
+                        !db.objectStoreNames.contains(
+                            STORE_WORD
+                        )
+                    ) {
+
+                        db.createObjectStore(
+                            STORE_WORD,
+                            {
+                                keyPath: "id",
+                                autoIncrement: true
+                            }
+                        );
+
+                    }
+
+                };
+
+
+            request.onsuccess =
+                function() {
+
+                    database =
+                        request.result;
+
+                    resolve();
+
+                };
+
+
+            request.onerror =
+                function() {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
+
+}
+
+
+function getAllImages(
+    storeName
+) {
+
+    return new Promise(
+        function(resolve, reject) {
+
+            const transaction =
+                database.transaction(
+                    storeName,
+                    "readonly"
+                );
+
+
+            const request =
+                transaction
+                    .objectStore(
+                        storeName
+                    )
+                    .getAll();
+
+
+            request.onsuccess =
+                function() {
+
+                    resolve(
+                        request.result || []
+                    );
+
+                };
+
+
+            request.onerror =
+                function() {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
+
+}
+
+
+function addImage(
+    storeName,
+    file
+) {
+
+    return new Promise(
+        function(resolve, reject) {
+
+            const transaction =
+                database.transaction(
+                    storeName,
+                    "readwrite"
+                );
+
+
+            const request =
+                transaction
+                    .objectStore(
+                        storeName
+                    )
+                    .add(
+                        {
+                            name:
+                                file.name,
+
+                            type:
+                                file.type,
+
+                            blob:
+                                file,
+
+                            createdAt:
+                                Date.now()
+                        }
+                    );
+
+
+            request.onsuccess =
+                function() {
+
+                    resolve();
+
+                };
+
+
+            request.onerror =
+                function() {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
+
+}
+
+
+function clearImages(
+    storeName
+) {
+
+    return new Promise(
+        function(resolve, reject) {
+
+            const transaction =
+                database.transaction(
+                    storeName,
+                    "readwrite"
+                );
+
+
+            const request =
+                transaction
+                    .objectStore(
+                        storeName
+                    )
+                    .clear();
+
+
+            request.onsuccess =
+                function() {
+
+                    resolve();
+
+                };
+
+
+            request.onerror =
+                function() {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
+
+}
+
+
+function deleteImagesByIds(
+    storeName,
+    ids
+) {
+
+    return new Promise(
+        function(resolve, reject) {
+
+            const transaction =
+                database.transaction(
+                    storeName,
+                    "readwrite"
+                );
+
+
+            const store =
+                transaction.objectStore(
+                    storeName
+                );
+
+
+            for (
+                const id
+                of ids
+            ) {
+
+                store.delete(
+                    id
+                );
+
+            }
+
+
+            transaction.oncomplete =
+                function() {
+
+                    resolve();
+
+                };
+
+
+            transaction.onerror =
+                function() {
+
+                    reject(
+                        transaction.error
+                    );
+
+                };
+
+        }
+    );
+
+}
+
+
+function saveImageOrder(
+    storeName,
+    records
+) {
+
+    return new Promise(
+        function(resolve, reject) {
+
+            const transaction =
+                database.transaction(
+                    storeName,
+                    "readwrite"
+                );
+
+
+            const store =
+                transaction.objectStore(
+                    storeName
+                );
+
+
+            records.forEach(
+                function(record, index) {
+
+                    record.sortOrder =
+                        index;
+
+
+                    store.put(
+                        record
+                    );
+
+                }
+            );
+
+
+            transaction.oncomplete =
+                function() {
+
+                    resolve();
+
+                };
+
+
+            transaction.onerror =
+                function() {
+
+                    reject(
+                        transaction.error
+                    );
+
+                };
+
+        }
+    );
+
+}
+
+
+function imageSortValue(
+    record
+) {
+
+    if (
+        Number.isFinite(
+            record.sortOrder
+        )
+    ) {
+
+        return record.sortOrder;
+
+    }
+
+
+    return record.id;
+
+}
+
+
+async function reloadImages() {
+
+    mainImages =
+        (
+            await getAllImages(
+                STORE_MAIN
+            )
+        ).sort(
+            function(a, b) {
+
+                return imageSortValue(a) - imageSortValue(b);
+
+            }
+        );
+
+
+    wordImages =
+        (
+            await getAllImages(
+                STORE_WORD
+            )
+        ).sort(
+            function(a, b) {
+
+                return imageSortValue(a) - imageSortValue(b);
+
+            }
+        );
+
+
+    mainCount.textContent =
+        "登録画像："
+        +
+        mainImages.length
+        +
+        " / "
+        +
+        MAX_MAIN_IMAGES;
+
+
+    wordCount.textContent =
+        "登録画像："
+        +
+        wordImages.length
+        +
+        " / "
+        +
+        MAX_WORD_IMAGES;
+
+}
+
+
+// ============================================================
+// 画像
+// ============================================================
+
+function revokeImageURL(
+    imageElement
+) {
+
+    const oldURL =
+        imageElement.dataset.url;
+
+
+    if (
+        oldURL
+    ) {
+
+        URL.revokeObjectURL(
+            oldURL
+        );
+
+
+        delete imageElement.dataset.url;
+
+    }
+
+}
+
+
+function clearImageElement(
+    imageElement
+) {
+
+    imageElement.style.visibility =
+        "hidden";
+
+
+    imageElement.style.opacity =
+        "0";
+
+
+    revokeImageURL(
+        imageElement
+    );
+
+
+    imageElement.removeAttribute(
+        "src"
+    );
+
+}
+
+
+function displayBlob(
+    imageElement,
+    record
+) {
+
+    imageElement.style.visibility =
+        "hidden";
+
+
+    imageElement.style.opacity =
+        "0";
+
+
+    revokeImageURL(
+        imageElement
+    );
+
+
+    const url =
+        URL.createObjectURL(
+            record.blob
+        );
+
+
+    imageElement.dataset.url =
+        url;
+
+
+    imageElement.onload =
+        function() {
+
+            imageElement.style.visibility =
+                "visible";
+
+
+            imageElement.style.opacity =
+                "1";
+
+        };
+
+
+    imageElement.src =
+        url;
+
+}
+
+
+function showMainImage() {
+
+    if (
+        mainImages.length === 0
+    ) {
+
+        clearImageElement(
+            mainImage
+        );
+
+
+        return;
+
+    }
+
+
+    let index;
+
+
+    if (
+        imageOrderMode === "sequential"
+    ) {
+
+        if (
+            mainSequentialIndex >=
+            mainImages.length
+        ) {
+
+            mainSequentialIndex =
+                0;
+
+        }
+
+
+        index =
+            mainSequentialIndex;
+
+
+        mainSequentialIndex =
+            (
+                mainSequentialIndex + 1
+            )
+            %
+            mainImages.length;
+
+    }
+
+    else {
+
+        index =
+            Math.floor(
+                Math.random()
+                *
+                mainImages.length
+            );
+
+    }
+
+
+    displayBlob(
+        mainImage,
+        mainImages[index]
+    );
+
+}
+
+
+// ============================================================
+// 単語 鏡モード表示更新
+// ============================================================
+
+function updateWordMirrorMode() {
+
+    if (
+        wordMirrorMode
+    ) {
+
+        wordImage.classList.add(
+            "mirror"
+        );
+
+
+        wordMirrorButton.textContent =
+            "左右反転（鏡に映す）：ON";
+
+    }
+
+    else {
+
+        wordImage.classList.remove(
+            "mirror"
+        );
+
+
+        wordMirrorButton.textContent =
+            "左右反転（鏡に映す）：OFF";
+
+    }
+
+}
+
+
+wordMirrorButton.addEventListener(
+    "click",
+    function() {
+
+        wordMirrorMode =
+            !wordMirrorMode;
+
+
+        localStorage.setItem(
+            WORD_MIRROR_MODE_STORAGE_KEY,
+            String(
+                wordMirrorMode
+            )
+        );
+
+
+        updateWordMirrorMode();
+
+    }
+);
+
+
+// ============================================================
+// 単語練習
+// ============================================================
+
+function showWordImage() {
+
+    if (
+        wordImages.length === 0
+    ) {
+
+        clearImageElement(
+            wordImage
+        );
+
+
+        wordPosition.textContent =
+            "";
+
+
+        return;
+
+    }
+
+
+    if (
+        wordIndex >=
+        wordImages.length
+    ) {
+
+        wordIndex =
+            0;
+
+    }
+
+
+    displayBlob(
+        wordImage,
+        wordImages[wordIndex]
+    );
+
+
+    wordPosition.textContent =
+        (wordIndex + 1)
+        +
+        " / "
+        +
+        wordImages.length;
+
+}
+
+
+function nextWordImage() {
+
+    if (
+        wordImages.length === 0
+    ) {
+
+        return;
+
+    }
+
+
+    wordIndex++;
+
+
+    if (
+        wordIndex >=
+        wordImages.length
+    ) {
+
+        wordIndex =
+            0;
+
+    }
+
+
+    showWordImage();
+
+}
+
+
+// ============================================================
+// 画像管理
+// ============================================================
+
+let imageManagerTarget =
+    null;
+
+
+let imageManagerSelectedIds =
+    new Set();
+
+
+let imageManagerObjectURLs =
+    [];
+
+
+function managedStoreName() {
+
+    return imageManagerTarget === "main"
+        ? STORE_MAIN
+        : STORE_WORD;
+
+}
+
+
+function managedImages() {
+
+    return imageManagerTarget === "main"
+        ? mainImages
+        : wordImages;
+
+}
+
+
+function revokeManagerObjectURLs() {
+
+    for (
+        const url
+        of imageManagerObjectURLs
+    ) {
+
+        URL.revokeObjectURL(
+            url
+        );
+
+    }
+
+
+    imageManagerObjectURLs =
+        [];
+
+}
+
+
+function renderImageManager() {
+
+    revokeManagerObjectURLs();
+
+
+    imageManagerGrid.replaceChildren();
+
+
+    const images =
+        managedImages();
+
+
+    if (
+        images.length === 0
+    ) {
+
+        const empty =
+            document.createElement(
+                "div"
+            );
+
+
+        empty.className =
+            "image-manager-empty";
+
+
+        empty.textContent =
+            "登録されている画像はありません。";
+
+
+        imageManagerGrid.appendChild(
+            empty
+        );
+
+
+        deleteSelectedImagesButton.disabled =
+            true;
+
+
+        return;
+
+    }
+
+
+    deleteSelectedImagesButton.disabled =
+        imageManagerSelectedIds.size === 0;
+
+
+    images.forEach(
+        function(record, index) {
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "image-manager-card";
+
+
+            if (
+                imageManagerSelectedIds.has(
+                    record.id
+                )
+            ) {
+
+                card.classList.add(
+                    "selected"
+                );
+
+            }
+
+
+            const image =
+                document.createElement(
+                    "img"
+                );
+
+
+            image.className =
+                "image-manager-thumb";
+
+            image.alt =
+                "登録画像 " + (index + 1);
+
+
+            const url =
+                URL.createObjectURL(
+                    record.blob
+                );
+
+
+            imageManagerObjectURLs.push(
+                url
+            );
+
+
+            image.src =
+                url;
+
+
+            const number =
+                document.createElement(
+                    "div"
+                );
+
+
+            number.className =
+                "image-manager-number";
+
+            number.textContent =
+                (index + 1)
+                +
+                " / "
+                +
+                images.length;
+
+
+            const label =
+                document.createElement(
+                    "label"
+                );
+
+
+            label.className =
+                "image-manager-select";
+
+
+            const checkbox =
+                document.createElement(
+                    "input"
+                );
+
+
+            checkbox.type =
+                "checkbox";
+
+            checkbox.checked =
+                imageManagerSelectedIds.has(
+                    record.id
+                );
+
+
+            checkbox.addEventListener(
+                "change",
+                function() {
+
+                    if (
+                        checkbox.checked
+                    ) {
+
+                        imageManagerSelectedIds.add(
+                            record.id
+                        );
+
+                    }
+
+                    else {
+
+                        imageManagerSelectedIds.delete(
+                            record.id
+                        );
+
+                    }
+
+
+                    renderImageManager();
+
+                }
+            );
+
+
+            const labelText =
+                document.createElement(
+                    "span"
+                );
+
+
+            labelText.textContent =
+                "選択";
+
+
+            label.append(
+                checkbox,
+                labelText
+            );
+
+
+            const move =
+                document.createElement(
+                    "div"
+                );
+
+
+            move.className =
+                "image-manager-move";
+
+
+            const previousButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            previousButton.type =
+                "button";
+
+            previousButton.textContent =
+                "← 前へ";
+
+            previousButton.disabled =
+                index === 0;
+
+
+            previousButton.addEventListener(
+                "click",
+                function() {
+
+                    moveManagedImage(
+                        index,
+                        -1
+                    );
+
+                }
+            );
+
+
+            const nextButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            nextButton.type =
+                "button";
+
+            nextButton.textContent =
+                "後へ →";
+
+            nextButton.disabled =
+                index === images.length - 1;
+
+
+            nextButton.addEventListener(
+                "click",
+                function() {
+
+                    moveManagedImage(
+                        index,
+                        1
+                    );
+
+                }
+            );
+
+
+            move.append(
+                previousButton,
+                nextButton
+            );
+
+
+            card.append(
+                image,
+                number,
+                label,
+                move
+            );
+
+
+            imageManagerGrid.appendChild(
+                card
+            );
+
+        }
+    );
+
+}
+
+
+async function moveManagedImage(
+    index,
+    direction
+) {
+
+    const images =
+        managedImages();
+
+
+    const targetIndex =
+        index + direction;
+
+
+    if (
+        targetIndex < 0
+        ||
+        targetIndex >= images.length
+    ) {
+
+        return;
+
+    }
+
+
+    const temporary =
+        images[index];
+
+
+    images[index] =
+        images[targetIndex];
+
+    images[targetIndex] =
+        temporary;
+
+
+    await saveImageOrder(
+        managedStoreName(),
+        images
+    );
+
+
+    await reloadImages();
+
+
+    mainSequentialIndex =
+        0;
+
+    wordIndex =
+        0;
+
+
+    renderImageManager();
+
+}
+
+
+function openImageManager(
+    target
+) {
+
+    imageManagerTarget =
+        target;
+
+
+    imageManagerSelectedIds.clear();
+
+
+    imageManagerTitle.textContent =
+        target === "main"
+        ? "トップページの画像を管理"
+        : "単語練習の画像を管理";
+
+
+    renderImageManager();
+
+
+    imageManagerOverlay.classList.add(
+        "open"
+    );
+
+    imageManagerOverlay.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+}
+
+
+function closeImageManager() {
+
+    imageManagerOverlay.classList.remove(
+        "open"
+    );
+
+    imageManagerOverlay.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+
+    imageManagerSelectedIds.clear();
+
+
+    revokeManagerObjectURLs();
+
+
+    if (
+        imageManagerTarget === "word"
+    ) {
+
+        showWordImage();
+
+    }
+
+
+    imageManagerTarget =
+        null;
+
+}
+
+
+async function deleteSelectedManagedImages() {
+
+    if (
+        imageManagerSelectedIds.size === 0
+    ) {
+
+        return;
+
+    }
+
+
+    const count =
+        imageManagerSelectedIds.size;
+
+
+    if (
+        !confirm(
+            count
+            +
+            "枚の画像を削除しますか？"
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    await deleteImagesByIds(
+        managedStoreName(),
+        Array.from(
+            imageManagerSelectedIds
+        )
+    );
+
+
+    imageManagerSelectedIds.clear();
+
+
+    await reloadImages();
+
+
+    const images =
+        managedImages();
+
+
+    if (
+        images.length > 0
+    ) {
+
+        await saveImageOrder(
+            managedStoreName(),
+            images
+        );
+
+        await reloadImages();
+
+    }
+
+
+    mainSequentialIndex =
+        0;
+
+    wordIndex =
+        0;
+
+
+    if (
+        imageManagerTarget === "main"
+    ) {
+
+        clearImageElement(
+            mainImage
+        );
+
+    }
+
+
+    renderImageManager();
+
+}
+
+
+document
+    .getElementById(
+        "manageMainButton"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            openImageManager(
+                "main"
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "manageWordButton"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            openImageManager(
+                "word"
+            );
+
+        }
+    );
+
+
+deleteSelectedImagesButton.addEventListener(
+    "click",
+    deleteSelectedManagedImages
+);
+
+
+document
+    .getElementById(
+        "closeImageManagerButton"
+    )
+    .addEventListener(
+        "click",
+        closeImageManager
+    );
+
+
+imageManagerOverlay.addEventListener(
+    "click",
+    function(event) {
+
+        if (
+            event.target === imageManagerOverlay
+        ) {
+
+            closeImageManager();
+
+        }
+
+    }
+);
+
+
+// ============================================================
+// 画像登録
+// ============================================================
+
+document
+    .getElementById(
+        "registerMainButton"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            if (
+                mainImages.length >=
+                MAX_MAIN_IMAGES
+            ) {
+
+                alert(
+                    "画像は20枚まで登録できます。"
+                );
+
+
+                return;
+
+            }
+
+
+            mainFileInput.value =
+                "";
+
+
+            mainFileInput.click();
+
+        }
+    );
+
+
+mainFileInput.addEventListener(
+    "change",
+    async function() {
+
+        const remaining =
+            MAX_MAIN_IMAGES
+            -
+            mainImages.length;
+
+
+        const files =
+            Array.from(
+                mainFileInput.files
+            ).slice(
+                0,
+                remaining
+            );
+
+
+        let added =
+            0;
+
+
+        for (
+            const file
+            of files
+        ) {
+
+            if (
+                !file.type.startsWith(
+                    "image/"
+                )
+            ) {
+
+                continue;
+
+            }
+
+
+            await addImage(
+                STORE_MAIN,
+                file
+            );
+
+
+            added++;
+
+        }
+
+
+        await reloadImages();
+
+
+        if (
+            added > 0
+        ) {
+
+            alert(
+                added
+                +
+                "枚の画像を登録しました。"
+            );
+
+        }
+
+    }
+);
+
+
+document
+    .getElementById(
+        "clearMainButton"
+    )
+    .addEventListener(
+        "click",
+        async function() {
+
+            if (
+                mainImages.length === 0
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                !confirm(
+                    "登録した画像をすべて削除しますか？"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            await clearImages(
+                STORE_MAIN
+            );
+
+
+            mainSequentialIndex =
+                0;
+
+
+            await reloadImages();
+
+
+            clearImageElement(
+                mainImage
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "registerWordButton"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            if (
+                wordImages.length >=
+                MAX_WORD_IMAGES
+            ) {
+
+                alert(
+                    "画像は20枚まで登録できます。"
+                );
+
+
+                return;
+
+            }
+
+
+            wordFileInput.value =
+                "";
+
+
+            wordFileInput.click();
+
+        }
+    );
+
+
+wordFileInput.addEventListener(
+    "change",
+    async function() {
+
+        const remaining =
+            MAX_WORD_IMAGES
+            -
+            wordImages.length;
+
+
+        const files =
+            Array.from(
+                wordFileInput.files
+            ).slice(
+                0,
+                remaining
+            );
+
+
+        const wasEmpty =
+            wordImages.length === 0;
+
+
+        for (
+            const file
+            of files
+        ) {
+
+            if (
+                !file.type.startsWith(
+                    "image/"
+                )
+            ) {
+
+                continue;
+
+            }
+
+
+            await addImage(
+                STORE_WORD,
+                file
+            );
+
+        }
+
+
+        await reloadImages();
+
+
+        if (
+            wasEmpty
+            &&
+            wordImages.length > 0
+        ) {
+
+            wordIndex =
+                0;
+
+        }
+
+
+        showWordImage();
+
+    }
+);
+
+
+document
+    .getElementById(
+        "clearWordButton"
+    )
+    .addEventListener(
+        "click",
+        async function() {
+
+            if (
+                wordImages.length === 0
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                !confirm(
+                    "登録した単語画像をすべて削除しますか？"
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            await clearImages(
+                STORE_WORD
+            );
+
+
+            wordIndex =
+                0;
+
+
+            await reloadImages();
+
+
+            showWordImage();
+
+        }
+    );
+
+
+wordImageBox.addEventListener(
+    "click",
+    nextWordImage
+);
+
+
+// ============================================================
+// 画面切替
+// ============================================================
+
+document
+    .getElementById(
+        "vowelButton"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            showScreen(
+                vowelScreen
+            );
+
+
+            requestAnimationFrame(
+                drawBar
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "wordButton"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            wordIndex =
+                0;
+
+
+            showWordImage();
+
+
+            showScreen(
+                wordScreen
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "vowelBackButton"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            showScreen(
+                mainScreen
+            );
+
+        }
+    );
+
+
+document
+    .getElementById(
+        "wordBackButton"
+    )
+    .addEventListener(
+        "click",
+        function() {
+
+            showScreen(
+                mainScreen
+            );
+
+        }
+    );
+
+
+// ============================================================
+// 母音後続
+// ============================================================
+
+const barArea =
+    document.getElementById(
+        "barArea"
+    );
+
+
+const barTrack =
+    document.getElementById(
+        "barTrack"
+    );
+
+
+const blueSegment =
+    document.getElementById(
+        "blueSegment"
+    );
+
+
+const redSegment =
+    document.getElementById(
+        "redSegment"
+    );
+
+
+const leftLine =
+    document.getElementById(
+        "leftLine"
+    );
+
+
+const middleLine =
+    document.getElementById(
+        "middleLine"
+    );
+
+
+const rightLine =
+    document.getElementById(
+        "rightLine"
+    );
+
+
+const leftHandle =
+    document.getElementById(
+        "leftHandle"
+    );
+
+
+const middleHandle =
+    document.getElementById(
+        "middleHandle"
+    );
+
+
+const rightHandle =
+    document.getElementById(
+        "rightHandle"
+    );
+
+
+const mirrorButton =
+    document.getElementById(
+        "mirrorButton"
+    );
+
+
+let barLeft =
+    0.15;
+
+
+let barMiddle =
+    0.50;
+
+
+let barRight =
+    0.85;
+
+
+let dragging =
+    null;
+
+
+// ============================================================
+// 鏡モード表示更新
+// ============================================================
+
+function updateMirrorMode() {
+
+    if (
+        mirrorMode
+    ) {
+
+        barTrack.classList.add(
+            "mirror"
+        );
+
+
+        mirrorButton.textContent =
+            "左右反転（鏡に映す）：ON";
+
+    }
+
+    else {
+
+        barTrack.classList.remove(
+            "mirror"
+        );
+
+
+        mirrorButton.textContent =
+            "左右反転（鏡に映す）：OFF";
+
+    }
+
+}
+
+
+// ============================================================
+// 鏡モード切替
+// ============================================================
+
+mirrorButton.addEventListener(
+    "click",
+    function() {
+
+        mirrorMode =
+            !mirrorMode;
+
+
+        localStorage.setItem(
+            MIRROR_MODE_STORAGE_KEY,
+            String(
+                mirrorMode
+            )
+        );
+
+
+        updateMirrorMode();
+
+
+        drawBar();
+
+    }
+);
+
+
+// ============================================================
+// バー描画
+// ============================================================
+
+function drawBar() {
+
+    const width =
+        barTrack.clientWidth;
+
+
+    const left =
+        barLeft
+        *
+        width;
+
+
+    const middle =
+        barMiddle
+        *
+        width;
+
+
+    const right =
+        barRight
+        *
+        width;
+
+
+    blueSegment.style.left =
+        left
+        +
+        "px";
+
+
+    blueSegment.style.width =
+        (
+            middle
+            -
+            left
+        )
+        +
+        "px";
+
+
+    redSegment.style.left =
+        middle
+        +
+        "px";
+
+
+    redSegment.style.width =
+        (
+            right
+            -
+            middle
+        )
+        +
+        "px";
+
+
+    leftLine.style.left =
+        left
+        +
+        "px";
+
+
+    middleLine.style.left =
+        middle
+        +
+        "px";
+
+
+    rightLine.style.left =
+        right
+        +
+        "px";
+
+
+    leftHandle.style.left =
+        left
+        +
+        "px";
+
+
+    middleHandle.style.left =
+        middle
+        +
+        "px";
+
+
+    rightHandle.style.left =
+        right
+        +
+        "px";
+
+
+    blueSegment.textContent =
+        (
+            middle - left > 70
+        )
+        ?
+        "いき"
+        :
+        "";
+
+
+    redSegment.textContent =
+        (
+            right - middle > 70
+        )
+        ?
+        "こえ"
+        :
+        "";
+
+}
+
+
+// ============================================================
+// バー最小幅
+// ============================================================
+
+function minimumBarWidth() {
+
+    const width =
+        Math.max(
+            1,
+            barTrack.clientWidth
+        );
+
+
+    return Math.max(
+        20 / width,
+        0.02
+    );
+
+}
+
+
+// ============================================================
+// 画面上のX座標を論理位置に変換
+// ============================================================
+
+function pointerRatio(
+    clientX
+) {
+
+    const rect =
+        barTrack.getBoundingClientRect();
+
+
+    let ratio =
+        (
+            clientX
+            -
+            rect.left
+        )
+        /
+        rect.width;
+
+
+    ratio =
+        Math.max(
+            0,
+            Math.min(
+                1,
+                ratio
+            )
+        );
+
+
+    if (
+        mirrorMode
+    ) {
+
+        ratio =
+            1
+            -
+            ratio;
+
+    }
+
+
+    return ratio;
+
+}
+
+
+// ============================================================
+// 最寄りハンドル
+// ============================================================
+
+function nearestHandle(
+    clientX
+) {
+
+    const ratio =
+        pointerRatio(
+            clientX
+        );
+
+
+    const values =
+        {
+
+            left:
+                Math.abs(
+                    ratio
+                    -
+                    barLeft
+                ),
+
+            middle:
+                Math.abs(
+                    ratio
+                    -
+                    barMiddle
+                ),
+
+            right:
+                Math.abs(
+                    ratio
+                    -
+                    barRight
+                )
+
+        };
+
+
+    return Object
+        .entries(
+            values
+        )
+        .sort(
+            function(a, b) {
+
+                return (
+                    a[1]
+                    -
+                    b[1]
+                );
+
+            }
+        )[0][0];
+
+}
+
+
+// ============================================================
+// バー移動
+// ============================================================
+
+function moveBar(
+    clientX
+) {
+
+    if (
+        dragging === null
+    ) {
+
+        return;
+
+    }
+
+
+    let x =
+        pointerRatio(
+            clientX
+        );
+
+
+    x =
+        Math.max(
+            0.02,
+            Math.min(
+                0.98,
+                x
+            )
+        );
+
+
+    const minimum =
+        minimumBarWidth();
+
+
+    if (
+        dragging === "left"
+    ) {
+
+        barLeft =
+            Math.max(
+                0.02,
+
+                Math.min(
+                    x,
+
+                    barMiddle
+                    -
+                    minimum
+                )
+            );
+
+    }
+
+
+    else if (
+        dragging === "middle"
+    ) {
+
+        barMiddle =
+            Math.max(
+                barLeft
+                +
+                minimum,
+
+                Math.min(
+                    x,
+
+                    barRight
+                    -
+                    minimum
+                )
+            );
+
+    }
+
+
+    else if (
+        dragging === "right"
+    ) {
+
+        barRight =
+            Math.min(
+                0.98,
+
+                Math.max(
+                    x,
+
+                    barMiddle
+                    +
+                    minimum
+                )
+            );
+
+    }
+
+
+    drawBar();
+
+}
+
+
+// ============================================================
+// Pointer操作
+// ============================================================
+
+barArea.addEventListener(
+    "pointerdown",
+    function(event) {
+
+        dragging =
+            nearestHandle(
+                event.clientX
+            );
+
+
+        try {
+
+            barArea.setPointerCapture(
+                event.pointerId
+            );
+
+        }
+
+        catch (error) {}
+
+
+        moveBar(
+            event.clientX
+        );
+
+
+        event.preventDefault();
+
+    }
+);
+
+
+barArea.addEventListener(
+    "pointermove",
+    function(event) {
+
+        if (
+            dragging === null
+        ) {
+
+            return;
+
+        }
+
+
+        moveBar(
+            event.clientX
+        );
+
+
+        event.preventDefault();
+
+    }
+);
+
+
+barArea.addEventListener(
+    "pointerup",
+    function() {
+
+        dragging =
+            null;
+
+    }
+);
+
+
+barArea.addEventListener(
+    "pointercancel",
+    function() {
+
+        dragging =
+            null;
+
+    }
+);
+
+
+window.addEventListener(
+    "resize",
+    drawBar
+);
+
+
+// ============================================================
+// Audio状態
+// ============================================================
+
+let audioContext =
+    null;
+
+
+let mediaStream =
+    null;
+
+
+let sourceNode =
+    null;
+
+
+let processorNode =
+    null;
+
+
+let muteNode =
+    null;
+
+
+let sampleQueue =
+    [];
+
+
+let queueOffset =
+    0;
+
+
+let frameSize =
+    735;
+
+
+let calibrationFramesNeeded =
+    60;
+
+
+let androidReleaseFramesNeeded =
+    17;
+
+let androidSilenceReleaseFramesNeeded =
+    11;
+
+let androidSilenceCount =
+    0;
+
+
+let pcSoftReleaseFramesNeeded =
+    30;
+
+
+let pcSilenceFramesNeeded =
+    11;
+
+
+let iosReferenceBuildFramesNeeded =
+    15;
+
+
+let iosReleaseFramesNeeded =
+    12;
+
+
+let iosSpectralReleaseFramesNeeded =
+    24;
+
+
+let iosInitialProtectionFramesNeeded =
+    18;
+
+
+let calibrating =
+    false;
+
+
+let calibrationVolumes =
+    [];
+
+
+let noiseFloor =
+    0;
+
+
+let normalDynamicMin =
+    NORMAL_MIN_VOLUME;
+
+
+let weakDynamicMin =
+    WEAK_MIN_VOLUME;
+
+
+let iosWeakDynamicMin =
+    IOS_WEAK_MIN_VOLUME;
+
+
+// iPad / iPhone で USB-C 等の外部入力を使っているか。
+// 世代判定ではなく、実際の入力トラック名で判定する。
+let iosExternalUSBMic =
+    false;
+
+
+let normalCount =
+    0;
+
+
+let weakCount =
+    0;
+
+
+let iosWeakCount =
+    0;
+
+
+// iOS低音量S追跡。
+// 最初に通常のS音量を満たしたフレームが連続してからだけ有効にする。
+let iosSSeedCount =
+    0;
+
+let iosSSeeded =
+    false;
+
+
+let iosBreathCount =
+    0;
+
+
+let breathCandidateCount =
+    0;
+
+
+let breathReleaseCount =
+    0;
+
+
+let breathReleaseFramesNeeded =
+    11;
+
+
+let iosBreathReleaseFramesNeeded =
+    6;
+
+
+let iosBreathReferenceBuildFramesNeeded =
+    13;
+
+
+let breathReferenceVolume =
+    0;
+
+
+let breathActiveFrameCount =
+    0;
+
+
+let soundLatched =
+    false;
+
+
+let releaseCount =
+    0;
+
+
+let silenceCount =
+    0;
+
+
+// PC
+
+let pcPendingOnset =
+    false;
+
+
+let pcOnsetConfirmCount =
+    0;
+
+
+// iPad
+
+let iosReferenceVolume =
+    0;
+
+
+let iosActiveFrameCount =
+    0;
+
+
+// Watchdog
+
+let lastAudioCallbackTime =
+    0;
+
+
+let watchdogTimer =
+    null;
+
+
+let rebuildingGraph =
+    false;
+
+
+// スタート／停止ボタン用
+let microphoneRunning =
+    false;
+
+
+function updateRecognitionStatus(
+    running
+) {
+
+    recognitionStatus.classList.toggle(
+        "active",
+        running
+    );
+
+}
+
+
+// ============================================================
+// リセット
+// ============================================================
+
+function resetRecognitionState(
+    hideImage = true
+) {
+
+    normalCount =
+        0;
+
+
+    weakCount =
+        0;
+
+
+    iosWeakCount =
+        0;
+
+
+    iosSSeedCount =
+        0;
+
+
+    iosSSeeded =
+        false;
+
+
+    iosBreathCount =
+        0;
+
+
+    breathCandidateCount =
+        0;
+
+
+    breathReleaseCount =
+        0;
+
+
+    breathReferenceVolume =
+        0;
+
+
+    breathActiveFrameCount =
+        0;
+
+
+    releaseCount =
+        0;
+
+
+    silenceCount =
+        0;
+
+
+    pcPendingOnset =
+        false;
+
+
+    pcOnsetConfirmCount =
+        0;
+
+
+    iosReferenceVolume =
+        0;
+
+
+    iosActiveFrameCount =
+        0;
+
+
+    soundLatched =
+        false;
+
+
+    if (
+        hideImage
+    ) {
+
+        clearImageElement(
+            mainImage
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// S終了
+// ============================================================
+
+function finishCurrentS() {
+
+    const hideImage =
+        (
+            displayMode === "during"
+        );
+
+
+    resetRecognitionState(
+        hideImage
+    );
+
+}
+
+
+// ============================================================
+// RMS
+// ============================================================
+
+function calculateRMS(
+    samples
+) {
+
+    let total =
+        0;
+
+
+    for (
+        let i = 0;
+        i < samples.length;
+        i++
+    ) {
+
+        total +=
+            samples[i]
+            *
+            samples[i];
+
+    }
+
+
+    return Math.sqrt(
+        total
+        /
+        samples.length
+    );
+
+}
+
+
+// ============================================================
+// Peak
+// ============================================================
+
+function calculatePeak(
+    samples
+) {
+
+    let peak =
+        0;
+
+
+    for (
+        const value
+        of samples
+    ) {
+
+        const absolute =
+            Math.abs(
+                value
+            );
+
+
+        if (
+            absolute > peak
+        ) {
+
+            peak =
+                absolute;
+
+        }
+
+    }
+
+
+    return peak;
+
+}
+
+
+// ============================================================
+// ZCR
+// ============================================================
+
+function calculateZCR(
+    samples
+) {
+
+    let count =
+        0;
+
+
+    for (
+        let i = 1;
+        i < samples.length;
+        i++
+    ) {
+
+        const before =
+            samples[
+                i - 1
+            ];
+
+
+        const now =
+            samples[
+                i
+            ];
+
+
+        if (
+            (
+                before < 0
+                &&
+                now >= 0
+            )
+            ||
+            (
+                before >= 0
+                &&
+                now < 0
+            )
+        ) {
+
+            count++;
+
+        }
+
+    }
+
+
+    return (
+        count
+        /
+        samples.length
+    );
+
+}
+
+
+// ============================================================
+// FFT
+// ============================================================
+
+function nextPowerOfTwo(
+    number
+) {
+
+    let value =
+        1;
+
+
+    while (
+        value < number
+    ) {
+
+        value *=
+            2;
+
+    }
+
+
+    return value;
+
+}
+
+
+function fftMagnitudes(
+    samples
+) {
+
+    const size =
+        nextPowerOfTwo(
+            samples.length
+        );
+
+
+    const real =
+        new Float64Array(
+            size
+        );
+
+
+    const imaginary =
+        new Float64Array(
+            size
+        );
+
+
+    for (
+        let i = 0;
+        i < samples.length;
+        i++
+    ) {
+
+        real[i] =
+            samples[i];
+
+    }
+
+
+    let j =
+        0;
+
+
+    for (
+        let i = 1;
+        i < size;
+        i++
+    ) {
+
+        let bit =
+            size >> 1;
+
+
+        while (
+            j & bit
+        ) {
+
+            j ^=
+                bit;
+
+
+            bit >>=
+                1;
+
+        }
+
+
+        j ^=
+            bit;
+
+
+        if (
+            i < j
+        ) {
+
+            const tempReal =
+                real[i];
+
+
+            real[i] =
+                real[j];
+
+
+            real[j] =
+                tempReal;
+
+
+            const tempImag =
+                imaginary[i];
+
+
+            imaginary[i] =
+                imaginary[j];
+
+
+            imaginary[j] =
+                tempImag;
+
+        }
+
+    }
+
+
+    for (
+        let length = 2;
+        length <= size;
+        length *= 2
+    ) {
+
+        const angle =
+            -2
+            *
+            Math.PI
+            /
+            length;
+
+
+        const baseCos =
+            Math.cos(
+                angle
+            );
+
+
+        const baseSin =
+            Math.sin(
+                angle
+            );
+
+
+        for (
+            let i = 0;
+            i < size;
+            i += length
+        ) {
+
+            let wCos =
+                1;
+
+
+            let wSin =
+                0;
+
+
+            for (
+                let k = 0;
+                k < length / 2;
+                k++
+            ) {
+
+                const firstReal =
+                    real[
+                        i + k
+                    ];
+
+
+                const firstImag =
+                    imaginary[
+                        i + k
+                    ];
+
+
+                const index2 =
+                    i
+                    +
+                    k
+                    +
+                    length / 2;
+
+
+                const secondReal =
+                    real[
+                        index2
+                    ]
+                    *
+                    wCos
+                    -
+                    imaginary[
+                        index2
+                    ]
+                    *
+                    wSin;
+
+
+                const secondImag =
+                    real[
+                        index2
+                    ]
+                    *
+                    wSin
+                    +
+                    imaginary[
+                        index2
+                    ]
+                    *
+                    wCos;
+
+
+                real[
+                    i + k
+                ] =
+                    firstReal
+                    +
+                    secondReal;
+
+
+                imaginary[
+                    i + k
+                ] =
+                    firstImag
+                    +
+                    secondImag;
+
+
+                real[
+                    index2
+                ] =
+                    firstReal
+                    -
+                    secondReal;
+
+
+                imaginary[
+                    index2
+                ] =
+                    firstImag
+                    -
+                    secondImag;
+
+
+                const nextCos =
+                    wCos
+                    *
+                    baseCos
+                    -
+                    wSin
+                    *
+                    baseSin;
+
+
+                const nextSin =
+                    wCos
+                    *
+                    baseSin
+                    +
+                    wSin
+                    *
+                    baseCos;
+
+
+                wCos =
+                    nextCos;
+
+
+                wSin =
+                    nextSin;
+
+            }
+
+        }
+
+    }
+
+
+    const magnitudes =
+        new Float64Array(
+            size / 2 + 1
+        );
+
+
+    for (
+        let i = 0;
+        i < magnitudes.length;
+        i++
+    ) {
+
+        magnitudes[i] =
+            Math.hypot(
+                real[i],
+                imaginary[i]
+            );
+
+    }
+
+
+    return {
+
+        magnitudes:
+            magnitudes,
+
+        fftSize:
+            size
+
+    };
+
+}
+
+
+// ============================================================
+// 分析
+// ============================================================
+
+function analyzeFrame(
+    samples
+) {
+
+    const volume =
+        calculateRMS(
+            samples
+        );
+
+
+    const peak =
+        calculatePeak(
+            samples
+        );
+
+
+    const zcr =
+        calculateZCR(
+            samples
+        );
+
+
+    const fft =
+        fftMagnitudes(
+            samples
+        );
+
+
+    let total =
+        0;
+
+
+    let high =
+        0;
+
+
+    // iPad の「ふー」除外用。
+    // 既存の S 判定そのものは変えず、
+    // 周波数の偏りを追加で確認するための値だけ集計する。
+    let lowMid =
+        0;
+
+
+    let upperHigh =
+        0;
+
+
+    let mid24 =
+        0;
+
+
+    let veryHigh =
+        0;
+
+
+    // スペクトル重心。
+    // 「すー」は高い周波数側に重心が来やすく、
+    // 「ふー」は低めになりやすいので、iPad の除外判定に使う。
+    let weightedFrequency =
+        0;
+
+
+    for (
+        let i = 0;
+        i < fft.magnitudes.length;
+        i++
+    ) {
+
+        const magnitude =
+            fft.magnitudes[i];
+
+
+        total +=
+            magnitude;
+
+
+        const frequency =
+            i
+            *
+            audioContext.sampleRate
+            /
+            fft.fftSize;
+
+
+        weightedFrequency +=
+            frequency
+            *
+            magnitude;
+
+
+        if (
+            frequency >= 3000
+        ) {
+
+            high +=
+                magnitude;
+
+        }
+
+
+        if (
+            frequency >= 700
+            &&
+            frequency < 3000
+        ) {
+
+            lowMid +=
+                magnitude;
+
+        }
+
+
+        if (
+            frequency >= 6000
+        ) {
+
+            upperHigh +=
+                magnitude;
+
+        }
+
+
+        if (
+            frequency >= 2000
+            &&
+            frequency < 4000
+        ) {
+
+            mid24 +=
+                magnitude;
+
+        }
+
+
+        if (
+            frequency >= 8000
+        ) {
+
+            veryHigh +=
+                magnitude;
+
+        }
+
+    }
+
+
+    const highRatio =
+        total > 0
+        ?
+        high / total
+        :
+        0;
+
+
+    const lowMidRatio =
+        total > 0
+        ?
+        lowMid / total
+        :
+        0;
+
+
+    const upperHighRatio =
+        total > 0
+        ?
+        upperHigh / total
+        :
+        0;
+
+
+    const mid24Ratio =
+        total > 0
+        ?
+        mid24 / total
+        :
+        0;
+
+
+    const veryHighRatio =
+        total > 0
+        ?
+        veryHigh / total
+        :
+        0;
+
+
+    const spectralCentroid =
+        total > 0
+        ?
+        weightedFrequency / total
+        :
+        0;
+
+
+    return {
+
+        volume:
+            volume,
+
+        peak:
+            peak,
+
+        zcr:
+            zcr,
+
+        highRatio:
+            highRatio,
+
+        lowMidRatio:
+            lowMidRatio,
+
+        upperHighRatio:
+            upperHighRatio,
+
+        mid24Ratio:
+            mid24Ratio,
+
+        veryHighRatio:
+            veryHighRatio,
+
+        spectralCentroid:
+            spectralCentroid
+
+    };
+
+}
+
+
+
+// ============================================================
+// Android S判定 診断表示
+// ============================================================
+
+function diagnosticMark(ok) {
+
+    return ok
+        ? "○"
+        : "×";
+
+}
+
+
+function diagnosticClass(ok) {
+
+    return ok
+        ? "android-diagnostic-ok"
+        : "android-diagnostic-ng";
+
+}
+
+
+function updateAndroidDiagnostic(
+    result
+) {
+
+    if (
+        !IS_ANDROID
+        ||
+        !androidDiagnostic
+    ) {
+
+        return;
+
+    }
+
+
+    androidDiagnostic.classList.add(
+        "show"
+    );
+
+
+    const peakRatio =
+        result.volume > 0
+        ?
+        result.peak / result.volume
+        :
+        999;
+
+
+    const upperShareOfHigh =
+        result.upperHighRatio
+        /
+        Math.max(
+            result.highRatio,
+            0.001
+        );
+
+
+    const veryHighShareOfHigh =
+        result.veryHighRatio
+        /
+        Math.max(
+            result.highRatio,
+            0.001
+        );
+
+
+    const upperToLowMid =
+        result.upperHighRatio
+        /
+        Math.max(
+            result.lowMidRatio,
+            0.001
+        );
+
+
+    const veryHighToMid =
+        result.veryHighRatio
+        /
+        Math.max(
+            result.mid24Ratio,
+            0.001
+        );
+
+
+    const onsetNoiseBasedMinimum =
+        Math.max(
+            noiseFloor * ANDROID_WEAK_NOISE_MULTIPLIER,
+            noiseFloor + ANDROID_WEAK_NOISE_ADD
+        );
+
+
+    const onsetMinimum =
+        Math.max(
+            ANDROID_WEAK_MIN_VOLUME,
+            Math.min(
+                onsetNoiseBasedMinimum,
+                ANDROID_WEAK_NOISE_CAP
+            )
+        );
+
+
+    const holdNoiseBasedMinimum =
+        Math.max(
+            noiseFloor * ANDROID_HOLD_NOISE_MULTIPLIER,
+            noiseFloor + ANDROID_HOLD_NOISE_ADD
+        );
+
+
+    const holdMinimum =
+        Math.max(
+            ANDROID_HOLD_MIN_VOLUME,
+            Math.min(
+                holdNoiseBasedMinimum,
+                ANDROID_HOLD_NOISE_CAP
+            )
+        );
+
+
+    const breathy =
+        androidClearlyBreathy(
+            result
+        );
+
+
+    const shape =
+        androidSShape(
+            result
+        );
+
+
+    const common =
+        commonSFeatures(
+            result
+        );
+
+
+    const onsetChecks = [
+        ["音量", result.volume, onsetMinimum, result.volume >= onsetMinimum, 6],
+        ["High Ratio", result.highRatio, HIGH_RATIO_MIN, result.highRatio >= HIGH_RATIO_MIN, 3],
+        ["ZCR", result.zcr, ZCR_MIN, result.zcr >= ZCR_MIN, 3],
+        ["Peak/Volume", peakRatio, PEAK_RATIO_LIMIT, peakRatio <= PEAK_RATIO_LIMIT, 2],
+        ["Peak", result.peak, PEAK_LIMIT, result.peak <= PEAK_LIMIT, 4],
+        ["Centroid", result.spectralCentroid, 4800, result.spectralCentroid >= 4800, 0],
+        ["UpperHigh", result.upperHighRatio, 0.19, result.upperHighRatio >= 0.19, 3],
+        ["VeryHigh", result.veryHighRatio, 0.060, result.veryHighRatio >= 0.060, 3],
+        ["Upper/High", upperShareOfHigh, 0.33, upperShareOfHigh >= 0.33, 3],
+        ["VeryHigh/High", veryHighShareOfHigh, 0.105, veryHighShareOfHigh >= 0.105, 3],
+        ["Upper/LowMid", upperToLowMid, 0.82, upperToLowMid >= 0.82, 2],
+        ["VeryHigh/Mid24", veryHighToMid, 0.38, veryHighToMid >= 0.38, 2]
+    ];
+
+
+    const holdChecks = [
+        ["保持 音量", result.volume, holdMinimum, result.volume >= holdMinimum, 6],
+        ["保持 High Ratio", result.highRatio, ANDROID_HOLD_HIGH_RATIO_MIN, result.highRatio >= ANDROID_HOLD_HIGH_RATIO_MIN, 3],
+        ["保持 ZCR", result.zcr, ANDROID_HOLD_ZCR_MIN, result.zcr >= ANDROID_HOLD_ZCR_MIN, 3]
+    ];
+
+
+    const rows =
+        soundLatched
+        ?
+        holdChecks
+        :
+        onsetChecks;
+
+
+    androidDiagnosticGrid.replaceChildren();
+
+
+    const headers =
+        ["項目", "現在値 / 基準", "判定"];
+
+
+    headers.forEach(
+        function(label) {
+
+            const cell =
+                document.createElement(
+                    "div"
+                );
+
+            cell.textContent =
+                label;
+
+            cell.className =
+                "android-diagnostic-head";
+
+            androidDiagnosticGrid.appendChild(
+                cell
+            );
+
+        }
+    );
+
+
+    rows.forEach(
+        function(row) {
+
+            const [
+                name,
+                value,
+                threshold,
+                ok,
+                digits
+            ] = row;
+
+
+            const nameCell =
+                document.createElement(
+                    "div"
+                );
+
+            nameCell.textContent =
+                name;
+
+
+            const valueCell =
+                document.createElement(
+                    "div"
+                );
+
+            valueCell.textContent =
+                Number(value).toFixed(digits)
+                +
+                " / "
+                +
+                Number(threshold).toFixed(digits);
+
+
+            const markCell =
+                document.createElement(
+                    "div"
+                );
+
+            markCell.textContent =
+                diagnosticMark(
+                    ok
+                );
+
+            markCell.className =
+                diagnosticClass(
+                    ok
+                );
+
+
+            androidDiagnosticGrid.append(
+                nameCell,
+                valueCell,
+                markCell
+            );
+
+        }
+    );
+
+
+    const modeText =
+        soundLatched
+        ?
+        "持続中"
+        :
+        "開始待ち";
+
+
+    const onsetOK =
+        (
+            result.volume >= onsetMinimum
+            &&
+            common
+            &&
+            !breathy
+            &&
+            shape
+        );
+
+
+    const holdOK =
+        holdSAndroid(
+            result
+        );
+
+
+    androidDiagnosticSummary.textContent =
+        "状態："
+        +
+        modeText
+        +
+        "　noiseFloor="
+        +
+        noiseFloor.toFixed(6)
+        +
+        "　S形状="
+        +
+        diagnosticMark(shape)
+        +
+        "　ふー除外="
+        +
+        (breathy ? "×（息判定）" : "○")
+        +
+        "　開始総合="
+        +
+        diagnosticMark(onsetOK)
+        +
+        "　持続総合="
+        +
+        diagnosticMark(holdOK);
+
+}
+
+// ============================================================
+// S共通特徴
+// ============================================================
+
+function commonSFeatures(
+    result
+) {
+
+    if (
+        result.highRatio
+        <
+        HIGH_RATIO_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.zcr
+        <
+        ZCR_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    const peakRatio =
+        result.volume > 0
+        ?
+        result.peak
+        /
+        result.volume
+        :
+        999;
+
+
+    if (
+        peakRatio
+        >
+        PEAK_RATIO_LIMIT
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.peak
+        >
+        PEAK_LIMIT
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+// ============================================================
+// 通常S
+// ============================================================
+
+function normalS(
+    result
+) {
+
+    if (
+        result.volume
+        <
+        normalDynamicMin
+    ) {
+
+        return false;
+
+    }
+
+
+    return commonSFeatures(
+        result
+    );
+
+}
+
+
+// ============================================================
+// 弱いS
+// ============================================================
+
+function weakS(
+    result
+) {
+
+    if (
+        result.volume
+        <
+        weakDynamicMin
+    ) {
+
+        return false;
+
+    }
+
+
+    return commonSFeatures(
+        result
+    );
+
+}
+
+
+// ============================================================
+// Android 「ふー」らしい息の除外
+// ============================================================
+//
+// V14のS開始感度そのものは変えない。
+// 「ふー」はSより高域の集中が弱く、スペクトル重心や
+// 6kHz/8kHz以上の成分が少ない場合が多いため、
+// 明確に息寄りの形だけをS開始候補から外す。
+
+function androidClearlyBreathy(
+    result
+) {
+
+    const clearBreath =
+        result.spectralCentroid <= 4700
+        &&
+        result.upperHighRatio <= 0.24
+        &&
+        result.veryHighRatio <= 0.11;
+
+
+    const lowHighBreath =
+        result.spectralCentroid <= 5500
+        &&
+        result.lowMidRatio >= 0.20
+        &&
+        result.upperHighRatio <= 0.28
+        &&
+        result.veryHighRatio <= 0.13
+        &&
+        result.highRatio <= 0.66;
+
+
+    // 中くらい以上の「ふー」は音量が上がると、
+    // genericなS判定のHigh Ratioを超えることがある。
+    // その場合でも8kHz以上への集中が弱く、
+    // 2〜4kHz帯が比較的多い形なら息として除外する。
+    const strongBreath =
+        result.spectralCentroid <= 5900
+        &&
+        result.mid24Ratio >= 0.15
+        &&
+        result.veryHighRatio <= 0.14
+        &&
+        (
+            result.veryHighRatio
+            /
+            Math.max(
+                result.mid24Ratio,
+                0.001
+            )
+        )
+        <
+        0.80;
+
+
+    return (
+        clearBreath
+        ||
+        lowHighBreath
+        ||
+        strongBreath
+    );
+
+}
+
+
+// ============================================================
+// Android Sらしい高域形状
+// ============================================================
+//
+// 口をすぼめた「ふー」は、音量やHigh Ratioが上がると
+// genericなS判定を通ることがある。
+// そこでAndroidでは、Sに多い
+// ・高いスペクトル重心
+// ・6kHz以上
+// ・8kHz以上
+// の集中も確認する。
+// iOSほど厳しくせず、Androidの正しい弱いSを残しやすい値にする。
+
+function androidSShape(
+    result
+) {
+
+    const upperShareOfHigh =
+        result.upperHighRatio
+        /
+        Math.max(
+            result.highRatio,
+            0.001
+        );
+
+
+    const veryHighShareOfHigh =
+        result.veryHighRatio
+        /
+        Math.max(
+            result.highRatio,
+            0.001
+        );
+
+
+    // 摩擦感のある「ふー」は High Ratio 自体は高くなることがあるが、
+    // 正しい /s/ より 6kHz以上・8kHz以上への集中が弱く、
+    // 2〜4kHzや700〜3000Hz側に成分が残りやすい。
+    // V19/V20より少しだけ「高域への集中」を重視する。
+    const upperToLowMid =
+        result.upperHighRatio
+        /
+        Math.max(
+            result.lowMidRatio,
+            0.001
+        );
+
+
+    const veryHighToMid =
+        result.veryHighRatio
+        /
+        Math.max(
+            result.mid24Ratio,
+            0.001
+        );
+
+
+    return (
+        result.spectralCentroid >= 4800
+        &&
+        result.upperHighRatio >= 0.19
+        &&
+        result.veryHighRatio >= 0.060
+        &&
+        upperShareOfHigh >= 0.33
+        &&
+        veryHighShareOfHigh >= 0.105
+        &&
+        upperToLowMid >= 0.82
+        &&
+        veryHighToMid >= 0.38
+    );
+
+}
+
+
+// ============================================================
+// Android 弱いS開始
+// ============================================================
+
+function weakSAndroid(
+    result
+) {
+
+    const noiseBasedMinimum =
+        Math.max(
+            noiseFloor * ANDROID_WEAK_NOISE_MULTIPLIER,
+            noiseFloor + ANDROID_WEAK_NOISE_ADD
+        );
+
+
+    const minimumVolume =
+        Math.max(
+            ANDROID_WEAK_MIN_VOLUME,
+            Math.min(
+                noiseBasedMinimum,
+                ANDROID_WEAK_NOISE_CAP
+            )
+        );
+
+
+    if (
+        result.volume
+        <
+        minimumVolume
+    ) {
+
+        return false;
+
+    }
+
+
+    // 音量だけを下げ、Sらしさの基本条件は維持する。
+    return commonSFeatures(
+        result
+    );
+
+}
+
+
+// ============================================================
+// iPad 「ふー」らしい息だけを除外
+// ============================================================
+
+function iosClearlyBreathy(
+    result
+) {
+
+    // 正しい「すー」の感度をなるべく維持するため、
+    // 音量しきい値や従来の S 判定値は厳しくしない。
+    //
+    // 代わりに、iPad だけで
+    // ・スペクトル重心が低い
+    // ・700〜3000Hz が多い
+    // ・6000Hz 以上が少ない
+    // という「ふー」寄りの周波数分布を確認する。
+    //
+    // 純粋な「ふー」だけでなく、
+    // 「s」と「ふ」が混ざったような誤発音も少し広めに除外する。
+
+    const clearFu =
+        result.spectralCentroid <= 4400
+        &&
+        result.lowMidRatio >= 0.28
+        &&
+        result.upperHighRatio <= 0.17;
+
+
+    const mixedFu =
+        result.spectralCentroid <= 5700
+        &&
+        result.lowMidRatio >= 0.21
+        &&
+        result.upperHighRatio <= 0.25
+        &&
+        result.highRatio <= 0.62
+        &&
+        result.zcr <= 0.120;
+
+
+    const highButBreathy =
+        result.mid24Ratio >= 0.16
+        &&
+        result.veryHighRatio <= 0.10
+        &&
+        result.veryHighRatio
+            /
+            Math.max(
+                result.mid24Ratio,
+                0.001
+            )
+            <
+            0.55;
+
+
+    return (
+        clearFu
+        ||
+        mixedFu
+        ||
+        highButBreathy
+    );
+
+}
+
+
+// ============================================================
+// iPad弱いS
+// ============================================================
+
+function iosSShape(
+    result
+) {
+
+    // /s/ は iPad でも、口唇摩擦の「ふー」より
+    // 高い周波数側へエネルギーが集まりやすい。
+    // 「ふー」を明確に減らすため、iOSだけS開始時に
+    // この“高域型”の形を追加確認する。
+    // 音量条件には触れない。
+
+    const upperToLowMid =
+        result.upperHighRatio
+        /
+        Math.max(
+            result.lowMidRatio,
+            0.001
+        );
+
+
+    const upperShareOfHigh =
+        result.upperHighRatio
+        /
+        Math.max(
+            result.highRatio,
+            0.001
+        );
+
+
+    const veryHighToMid =
+        result.veryHighRatio
+        /
+        Math.max(
+            result.mid24Ratio,
+            0.001
+        );
+
+
+    const veryHighShareOfHigh =
+        result.veryHighRatio
+        /
+        Math.max(
+            result.highRatio,
+            0.001
+        );
+
+
+    if (
+        result.highRatio
+        <
+        IOS_S_SHAPE_HIGH_RATIO_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.spectralCentroid
+        <
+        IOS_S_SHAPE_CENTROID_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.upperHighRatio
+        <
+        IOS_S_SHAPE_UPPER_HIGH_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        upperToLowMid
+        <
+        IOS_S_SHAPE_UPPER_TO_LOWMID_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.zcr
+        <
+        IOS_S_SHAPE_ZCR_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        upperShareOfHigh
+        <
+        IOS_S_SHAPE_UPPER_SHARE_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.veryHighRatio
+        <
+        IOS_S_SHAPE_VERY_HIGH_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        veryHighToMid
+        <
+        IOS_S_SHAPE_VERY_HIGH_TO_MID_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        veryHighShareOfHigh
+        <
+        IOS_S_SHAPE_VERY_HIGH_SHARE_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+// ============================================================
+// iPad弱いS
+// ============================================================
+
+function weakSIOS(
+    result
+) {
+
+    const minimumVolume =
+        iosExternalUSBMic
+        ?
+        Math.max(
+            IOS_USB_WEAK_MIN_VOLUME,
+            noiseFloor
+            *
+            IOS_USB_WEAK_NOISE_MULTIPLIER
+        )
+        :
+        iosWeakDynamicMin;
+
+
+    if (
+        result.volume
+        <
+        minimumVolume
+    ) {
+
+        return false;
+
+    }
+
+
+    return (
+        commonSFeatures(
+            result
+        )
+        &&
+        iosSShape(
+            result
+        )
+    );
+
+}
+
+
+// ============================================================
+// PC追加確認
+// ============================================================
+
+function pcOnsetContinuation(
+    result
+) {
+
+    const minimumVolume =
+        Math.max(
+            0.0027,
+            noiseFloor * 1.15,
+            noiseFloor + 0.0004
+        );
+
+
+    if (
+        result.volume
+        <
+        minimumVolume
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.highRatio
+        <
+        0.32
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.zcr
+        <
+        0.018
+    ) {
+
+        return false;
+
+    }
+
+
+    const peakRatio =
+        result.volume > 0
+        ?
+        result.peak
+        /
+        result.volume
+        :
+        999;
+
+
+    if (
+        peakRatio > 5.0
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.peak > 0.095
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+// ============================================================
+// Android 無音判定
+// ============================================================
+
+function androidClearlySilent(
+    result
+) {
+
+    const silenceThreshold =
+        Math.max(
+            0.00055,
+            noiseFloor * 1.08,
+            noiseFloor + 0.00008
+        );
+
+
+    return (
+        result.volume
+        <
+        silenceThreshold
+    );
+
+}
+
+
+// ============================================================
+// Android継続
+// ============================================================
+
+function holdSAndroid(
+    result
+) {
+
+    const noiseBasedMinimum =
+        Math.max(
+            noiseFloor * ANDROID_HOLD_NOISE_MULTIPLIER,
+            noiseFloor + ANDROID_HOLD_NOISE_ADD
+        );
+
+
+    const minimumVolume =
+        Math.max(
+            ANDROID_HOLD_MIN_VOLUME,
+            Math.min(
+                noiseBasedMinimum,
+                ANDROID_HOLD_NOISE_CAP
+            )
+        );
+
+
+    if (
+        result.volume
+        <
+        minimumVolume
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.highRatio
+        <
+        ANDROID_HOLD_HIGH_RATIO_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.zcr
+        <
+        ANDROID_HOLD_ZCR_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    // ラッチ後に「ふー」へ移行した場合も、
+    // そのままSとして保持し続けない。
+    if (
+        androidClearlyBreathy(
+            result
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    const peakRatio =
+        result.volume > 0
+        ?
+        result.peak
+        /
+        result.volume
+        :
+        999;
+
+
+    if (
+        peakRatio > 6.0
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.peak > 0.11
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+// ============================================================
+// PC継続
+// ============================================================
+
+function holdSPC(
+    result
+) {
+
+    const minimumVolume =
+        Math.max(
+            noiseFloor * 1.15,
+            noiseFloor + 0.0004,
+            0.0022
+        );
+
+
+    if (
+        result.volume
+        <
+        minimumVolume
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.highRatio
+        <
+        PC_HOLD_HIGH_RATIO_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.zcr
+        <
+        PC_HOLD_ZCR_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+function pcClearlySilent(
+    result
+) {
+
+    const threshold =
+        Math.max(
+            0.0023,
+            noiseFloor * 1.25,
+            noiseFloor + 0.00055
+        );
+
+
+    return (
+        result.volume
+        <
+        threshold
+    );
+
+}
+
+
+// ============================================================
+// iPad継続
+// ============================================================
+
+
+// ============================================================
+// iPad / iPhone 低音量S追跡
+// ============================================================
+
+function iosLowVolumeSContinuation(
+    result
+) {
+
+    const minimumVolume =
+        Math.max(
+            IOS_S_LOW_VOLUME_MIN,
+            noiseFloor * IOS_S_LOW_NOISE_MULTIPLIER,
+            noiseFloor + IOS_S_LOW_NOISE_ADD
+        );
+
+
+    if (
+        result.volume
+        <
+        minimumVolume
+    ) {
+
+        return false;
+
+    }
+
+
+    // 音量をかなり低く許す代わりに、
+    // 周波数形状は通常の開始判定よりも厳しく「Sらしさ」を確認する。
+    if (
+        result.highRatio
+        <
+        IOS_S_LOW_HIGH_RATIO_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.spectralCentroid
+        <
+        IOS_S_LOW_CENTROID_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.upperHighRatio
+        <
+        IOS_S_LOW_UPPER_HIGH_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.zcr
+        <
+        IOS_S_LOW_ZCR_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.veryHighRatio
+        <
+        IOS_S_LOW_VERY_HIGH_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    const peakRatio =
+        result.volume > 0
+        ?
+        result.peak / result.volume
+        :
+        999;
+
+
+    if (
+        peakRatio
+        >
+        PEAK_RATIO_LIMIT
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.peak
+        >
+        PEAK_LIMIT
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+function holdSIOS(
+    result
+) {
+
+    const minimumVolume =
+        Math.max(
+            0.0019,
+            noiseFloor * 1.10,
+            noiseFloor + 0.00030
+        );
+
+
+    if (
+        result.volume
+        <
+        minimumVolume
+    ) {
+
+        return iosLowVolumeSContinuation(
+            result
+        );
+
+    }
+
+
+    if (
+        result.highRatio
+        <
+        IOS_HOLD_HIGH_RATIO_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.zcr
+        <
+        IOS_HOLD_ZCR_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+// ============================================================
+// iPad終了しきい値
+// ============================================================
+
+function iosReleaseVolumeThreshold() {
+
+    const relativeThreshold =
+        iosReferenceVolume
+        *
+        IOS_RELEASE_RATIO;
+
+
+    const noiseThreshold =
+        Math.max(
+            IOS_RELEASE_ABSOLUTE,
+
+            noiseFloor
+            *
+            IOS_RELEASE_NOISE_MULTIPLIER,
+
+            noiseFloor
+            +
+            IOS_RELEASE_NOISE_ADD
+        );
+
+
+    return Math.max(
+        relativeThreshold,
+        noiseThreshold
+    );
+
+}
+
+
+// ============================================================
+// キャリブレーション
+// ============================================================
+
+function finishCalibration() {
+
+    const values =
+        [
+            ...calibrationVolumes
+        ].sort(
+            function(a, b) {
+
+                return a - b;
+
+            }
+        );
+
+
+    if (
+        values.length > 0
+    ) {
+
+        noiseFloor =
+            values[
+                Math.floor(
+                    values.length / 2
+                )
+            ];
+
+    }
+
+    else {
+
+        noiseFloor =
+            0;
+
+    }
+
+
+    normalDynamicMin =
+        Math.max(
+            NORMAL_MIN_VOLUME,
+            noiseFloor * 1.35,
+            noiseFloor + 0.0015
+        );
+
+
+    normalDynamicMin =
+        Math.min(
+            normalDynamicMin,
+            0.0100
+        );
+
+
+    weakDynamicMin =
+        Math.max(
+            WEAK_MIN_VOLUME,
+            noiseFloor * 1.12,
+            noiseFloor + 0.0005
+        );
+
+
+    weakDynamicMin =
+        Math.max(
+            weakDynamicMin,
+            noiseFloor + 0.0004
+        );
+
+
+    weakDynamicMin =
+        Math.min(
+            weakDynamicMin,
+            0.0065
+        );
+
+
+    iosWeakDynamicMin =
+        Math.max(
+            IOS_WEAK_MIN_VOLUME,
+            noiseFloor * 0.75,
+            noiseFloor
+        );
+
+
+    iosWeakDynamicMin =
+        Math.min(
+            iosWeakDynamicMin,
+            0.0055
+        );
+
+
+    calibrating =
+        false;
+
+
+    statusElement.textContent =
+        "";
+
+}
+
+
+// ============================================================
+// ふーっと！モード判定
+// ============================================================
+
+function breathCandidate(
+    result
+) {
+
+    // iPad / iPhone の「ふーっと！」だけ専用判定へ。
+    // PC / Android の判定値は従来のまま変更しない。
+    if (
+        IS_IOS
+    ) {
+
+        return breathCandidateIOS(
+            result
+        );
+
+    }
+
+
+    const minimumVolume =
+        Math.max(
+            BREATH_MIN_VOLUME,
+            noiseFloor
+            *
+            BREATH_NOISE_MULTIPLIER,
+            noiseFloor
+            +
+            BREATH_NOISE_ADD
+        );
+
+
+    if (
+        result.volume
+        <
+        minimumVolume
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.highRatio
+        <
+        BREATH_HIGH_RATIO_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.zcr
+        <
+        BREATH_ZCR_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.spectralCentroid
+        <
+        BREATH_CENTROID_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    // 声だけの入力を開始候補から外す。
+    if (
+        result.highRatio < 0.18
+        &&
+        result.zcr < 0.035
+    ) {
+
+        return false;
+
+    }
+
+
+    // iPad / iPhone は声の成分を息として拾いやすいため、
+    // iOSだけ追加の声判定を通す。
+    // 弱い息の音量しきい値そのものは上げない。
+    if (
+        breathLooksLikeVoiceIOS(
+            result
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    const peakRatio =
+        result.volume > 0
+        ?
+        result.peak
+        /
+        result.volume
+        :
+        999;
+
+
+    if (
+        peakRatio
+        >
+        BREATH_PEAK_RATIO_LIMIT
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        result.peak
+        >
+        BREATH_PEAK_LIMIT
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+function breathCandidateIOS(
+    result
+) {
+
+    const minimumVolume =
+        Math.max(
+            IOS_BREATH_MIN_VOLUME,
+            noiseFloor
+            *
+            IOS_BREATH_NOISE_MULTIPLIER,
+            noiseFloor
+            +
+            IOS_BREATH_NOISE_ADD
+        );
+
+
+    if (
+        result.volume
+        <
+        minimumVolume
+    ) {
+
+        return false;
+
+    }
+
+
+    // 弱い息では高域量が少なくても拾えるよう、
+    // 周波数条件はかなり低いところまで許容する。
+    if (
+        result.highRatio < IOS_BREATH_HIGH_RATIO_MIN
+        ||
+        result.zcr < IOS_BREATH_ZCR_MIN
+        ||
+        result.spectralCentroid < IOS_BREATH_CENTROID_MIN
+    ) {
+
+        return false;
+
+    }
+
+
+    const peakRatio =
+        result.volume > 0
+        ?
+        result.peak / result.volume
+        :
+        999;
+
+
+    // コツッ、カサッ、指が触れた音などの短い衝撃音は、
+    // RMSに対して瞬間ピークが大きくなりやすい。
+    if (
+        peakRatio > IOS_BREATH_PEAK_RATIO_LIMIT
+        ||
+        result.peak > IOS_BREATH_PEAK_LIMIT
+    ) {
+
+        return false;
+
+    }
+
+
+    // 明らかに声らしいときだけ除外。
+    // 弱い息を犠牲にしないため、単一条件では落とさない。
+    if (
+        breathLooksLikeVoiceIOS(
+            result
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+function breathLooksLikeVoiceIOS(
+    result
+) {
+
+    if (
+        !IS_IOS
+    ) {
+
+        return false;
+
+    }
+
+
+    // 母音などの声は、iPadでは低～中域へ集中し、
+    // ZCRが低くなりやすい。
+    // 条件を単独で厳しくしすぎず、複数の特徴が
+    // 同時に「声らしい」ときだけ除外する。
+    if (
+        result.zcr < 0.040
+        &&
+        result.spectralCentroid < 3000
+        &&
+        result.highRatio < 0.25
+        &&
+        result.lowMidRatio > 0.34
+    ) {
+
+        return true;
+
+    }
+
+
+    // さらに、かなり周期的な声を除外する。
+    if (
+        result.zcr < 0.025
+        &&
+        result.highRatio < 0.30
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+function holdBreathIOS(
+    result
+) {
+
+    // ========================================================
+    // iPad「ふーっと！」持続判定・試験版
+    // ========================================================
+    // 開始判定は従来のまま。
+    // 第9世代では、持続する「ふー」が入力処理によって
+    // 0.02台 → 0.001台まで徐々に小さくなることがあるため、
+    // 「開始時最大音量の40%」を固定し続けない。
+    //
+    // 最初の短時間だけ最大値を基準にし、その後は基準値を
+    // 少しずつ下げて、実際に届いている息の音量へ追従させる。
+    // 無音との区別は noiseThreshold と息らしさ条件で維持する。
+
+    breathActiveFrameCount++;
+
+
+    if (
+        breathActiveFrameCount
+        <=
+        iosBreathReferenceBuildFramesNeeded
+    ) {
+
+        if (
+            result.volume
+            >
+            breathReferenceVolume
+        ) {
+
+            breathReferenceVolume =
+                result.volume;
+
+        }
+
+    }
+
+    else {
+
+        // 1フレームごとに基準値を約10%ずつ下げる。
+        // 現在音量の方が大きい場合は、その音量へ戻す。
+        // これにより「ふー」が時間とともに減衰しても
+        // 持続判定が追従できるようにする。
+        breathReferenceVolume =
+            Math.max(
+                result.volume,
+                breathReferenceVolume * 0.90
+            );
+
+    }
+
+
+    const relativeThreshold =
+        breathReferenceVolume
+        *
+        0.12;
+
+
+    const noiseThreshold =
+        Math.max(
+            noiseFloor
+            *
+            IOS_BREATH_RELEASE_NOISE_MULTIPLIER,
+
+            noiseFloor
+            +
+            IOS_BREATH_RELEASE_NOISE_ADD,
+
+            0.00034
+        );
+
+
+    const minimumVolume =
+        Math.max(
+            relativeThreshold,
+            noiseThreshold
+        );
+
+
+    if (
+        result.volume
+        <
+        minimumVolume
+    ) {
+
+        return false;
+
+    }
+
+
+    // 声へ移行した場合も「息が続いている」とみなさない。
+    if (
+        breathLooksLikeVoiceIOS(
+            result
+        )
+    ) {
+
+        return false;
+
+    }
+
+
+    // iPadでは無音後の微小な残留ノイズだけで
+    // ラッチし続けないよう、最低限の息らしさを残す。
+    if (
+        result.zcr < 0.010
+        &&
+        result.highRatio < 0.070
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+function holdBreath(
+    result
+) {
+
+    const minimumVolume =
+        Math.max(
+            BREATH_HOLD_MIN_VOLUME,
+            noiseFloor
+            *
+            BREATH_HOLD_NOISE_MULTIPLIER,
+            noiseFloor
+            +
+            BREATH_HOLD_NOISE_ADD
+        );
+
+
+    if (
+        result.volume
+        <
+        minimumVolume
+    ) {
+
+        return false;
+
+    }
+
+
+    // 継続中は非常に弱い息まで追従したいので、
+    // 周波数条件は開始時より大幅に緩くする。
+    if (
+        result.zcr < 0.003
+        &&
+        result.highRatio < 0.035
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+function processBreathResult(
+    result
+) {
+
+    if (
+        !soundLatched
+    ) {
+
+        if (
+            breathCandidate(
+                result
+            )
+        ) {
+
+            breathCandidateCount++;
+
+        }
+
+        else {
+
+            breathCandidateCount =
+                0;
+
+        }
+
+
+        const breathRequired =
+            IS_IOS
+            ?
+            IOS_BREATH_MODE_REQUIRED
+            :
+            BREATH_REQUIRED;
+
+
+        if (
+            breathCandidateCount
+            >=
+            breathRequired
+        ) {
+
+            soundLatched =
+                true;
+
+
+            breathCandidateCount =
+                0;
+
+
+            breathReleaseCount =
+                0;
+
+
+            breathReferenceVolume =
+                result.volume;
+
+
+            breathActiveFrameCount =
+                0;
+
+
+            showMainImage();
+
+        }
+
+
+        return;
+
+    }
+
+
+    const breathStillActive =
+        IS_IOS
+        ?
+        holdBreathIOS(
+            result
+        )
+        :
+        holdBreath(
+            result
+        );
+
+
+    if (
+        breathStillActive
+    ) {
+
+        breathReleaseCount =
+            0;
+
+
+        return;
+
+    }
+
+
+    breathReleaseCount++;
+
+
+    const requiredReleaseFrames =
+        IS_IOS
+        ?
+        iosBreathReleaseFramesNeeded
+        :
+        breathReleaseFramesNeeded;
+
+
+    if (
+        breathReleaseCount
+        >=
+        requiredReleaseFrames
+    ) {
+
+        finishCurrentS();
+
+    }
+
+}
+
+
+// ============================================================
+// S開始
+// ============================================================
+
+function latchS(
+    result
+) {
+
+    soundLatched =
+        true;
+
+
+    normalCount =
+        0;
+
+
+    weakCount =
+        0;
+
+
+    iosWeakCount =
+        0;
+
+
+    iosSSeedCount =
+        0;
+
+
+    iosSSeeded =
+        false;
+
+
+    iosBreathCount =
+        0;
+
+
+    releaseCount =
+        0;
+
+
+    androidSilenceCount =
+        0;
+
+
+    silenceCount =
+        0;
+
+
+    pcPendingOnset =
+        false;
+
+
+    pcOnsetConfirmCount =
+        0;
+
+
+    iosReferenceVolume =
+        result.volume;
+
+
+    iosActiveFrameCount =
+        0;
+
+
+    showMainImage();
+
+}
+
+
+// ============================================================
+// 音声判定
+// ============================================================
+
+function processResult(
+    result
+) {
+
+    if (
+        calibrating
+    ) {
+
+        calibrationVolumes.push(
+            result.volume
+        );
+
+
+        if (
+            calibrationVolumes.length
+            >=
+            calibrationFramesNeeded
+        ) {
+
+            finishCalibration();
+
+        }
+
+
+        return;
+
+    }
+
+
+    // ========================================================
+    // S未検出
+    // ========================================================
+
+    if (
+        !soundLatched
+    ) {
+
+        if (
+            !IS_ANDROID
+            &&
+            !IS_IOS
+            &&
+            pcPendingOnset
+        ) {
+
+            if (
+                pcOnsetContinuation(
+                    result
+                )
+            ) {
+
+                pcOnsetConfirmCount++;
+
+
+                if (
+                    pcOnsetConfirmCount
+                    >=
+                    PC_ONSET_EXTRA_FRAMES
+                ) {
+
+                    latchS(
+                        result
+                    );
+
+                }
+
+            }
+
+            else {
+
+                pcPendingOnset =
+                    false;
+
+
+                pcOnsetConfirmCount =
+                    0;
+
+
+                normalCount =
+                    0;
+
+
+                weakCount =
+                    0;
+
+            }
+
+
+            return;
+
+        }
+
+
+        // iPad / iPhone では、明確な「ふー」系の息が
+        // 2フレーム続いた場合だけ候補カウントを破棄する。
+        // 1フレームだけの揺れでは止めないため、
+        // 正しい「すー」への感度を保ちやすい。
+        if (
+            IS_IOS
+        ) {
+
+            if (
+                iosClearlyBreathy(
+                    result
+                )
+            ) {
+
+                iosBreathCount++;
+
+            }
+
+            else {
+
+                iosBreathCount =
+                    0;
+
+            }
+
+
+            if (
+                iosBreathCount
+                >=
+                IOS_BREATH_REQUIRED
+            ) {
+
+                normalCount =
+                    0;
+
+                weakCount =
+                    0;
+
+                iosWeakCount =
+                    0;
+
+
+                iosSSeedCount =
+                    0;
+
+
+                iosSSeeded =
+                    false;
+
+                return;
+
+            }
+
+        }
+
+        else {
+
+            iosBreathCount =
+                0;
+
+        }
+
+
+        // iPad / iPhone では、通常経路・弱音経路のどちらでも
+        // Sらしい高域分布を満たすことを開始条件にする。
+        // これにより「ふー」や「s＋ふ」の誤発音が
+        // genericなS判定をすり抜けるのを防ぐ。
+        const iosShapeOK =
+            !IS_IOS
+            ||
+            iosSShape(
+                result
+            );
+
+
+        const normalCandidate =
+            normalS(
+                result
+            )
+            &&
+            iosShapeOK
+            &&
+            (
+                !IS_ANDROID
+                ||
+                (
+                    !androidClearlyBreathy(
+                        result
+                    )
+                    &&
+                    androidSShape(
+                        result
+                    )
+                )
+            );
+
+
+        const weakCandidate =
+            (
+                IS_ANDROID
+                ?
+                weakSAndroid(
+                    result
+                )
+                :
+                weakS(
+                    result
+                )
+            )
+            &&
+            iosShapeOK
+            &&
+            (
+                !IS_ANDROID
+                ||
+                (
+                    !androidClearlyBreathy(
+                        result
+                    )
+                    &&
+                    androidSShape(
+                        result
+                    )
+                )
+            );
+
+
+        if (
+            normalCandidate
+        ) {
+
+            normalCount++;
+
+        }
+
+        else {
+
+            normalCount =
+                0;
+
+        }
+
+
+        if (
+            weakCandidate
+        ) {
+
+            weakCount++;
+
+        }
+
+        else {
+
+            weakCount =
+                0;
+
+        }
+
+
+        if (
+            IS_IOS
+        ) {
+
+            const fullVolumeIOSCandidate =
+                weakSIOS(
+                    result
+                );
+
+
+            if (
+                fullVolumeIOSCandidate
+            ) {
+
+                iosSSeedCount++;
+
+
+                if (
+                    iosSSeedCount
+                    >=
+                    IOS_S_SEED_REQUIRED
+                ) {
+
+                    iosSSeeded =
+                        true;
+
+                }
+
+
+                iosWeakCount++;
+
+            }
+
+            else if (
+                iosSSeeded
+                &&
+                iosLowVolumeSContinuation(
+                    result
+                )
+            ) {
+
+                // 一度、通常の音量でSだと確認できた後は、
+                // 第9世代で音量だけが減衰しても、
+                // 強いS形状が続いていれば候補カウントを切らさない。
+                iosWeakCount++;
+
+            }
+
+            else {
+
+                iosWeakCount =
+                    0;
+
+
+                iosSSeedCount =
+                    0;
+
+
+                iosSSeeded =
+                    false;
+
+            }
+
+        }
+
+        else {
+
+            iosWeakCount =
+                0;
+
+
+            iosSSeedCount =
+                0;
+
+
+            iosSSeeded =
+                false;
+
+        }
+
+
+        const normalSuccess =
+            normalCount
+            >=
+            (
+                IS_IOS
+                ?
+                (
+                    iosExternalUSBMic
+                    ?
+                    IOS_USB_S_REQUIRED
+                    :
+                    IOS_NORMAL_REQUIRED
+                )
+                :
+                NORMAL_REQUIRED
+            );
+
+
+        const weakSuccess =
+            weakCount
+            >=
+            (
+                IS_IOS
+                ?
+                (
+                    iosExternalUSBMic
+                    ?
+                    IOS_USB_S_REQUIRED
+                    :
+                    IOS_WEAK_REQUIRED
+                )
+                :
+                (
+                    IS_ANDROID
+                    ?
+                    ANDROID_WEAK_REQUIRED
+                    :
+                    WEAK_REQUIRED
+                )
+            );
+
+
+        const iosWeakSuccess =
+            IS_IOS
+            &&
+            iosWeakCount
+            >=
+            (
+                iosExternalUSBMic
+                ?
+                IOS_USB_S_REQUIRED
+                :
+                IOS_WEAK_REQUIRED
+            );
+
+
+        if (
+            normalSuccess
+            ||
+            weakSuccess
+            ||
+            iosWeakSuccess
+        ) {
+
+            if (
+                !IS_ANDROID
+                &&
+                !IS_IOS
+            ) {
+
+                pcPendingOnset =
+                    true;
+
+
+                pcOnsetConfirmCount =
+                    0;
+
+
+                return;
+
+            }
+
+
+            latchS(
+                result
+            );
+
+        }
+
+
+        return;
+
+    }
+
+
+    // ========================================================
+    // Android
+    // ========================================================
+
+    if (
+        IS_ANDROID
+    ) {
+
+        if (
+            holdSAndroid(
+                result
+            )
+        ) {
+
+            releaseCount =
+                0;
+
+            androidSilenceCount =
+                0;
+
+
+            return;
+
+        }
+
+
+        releaseCount++;
+
+
+        if (
+            androidClearlySilent(
+                result
+            )
+        ) {
+
+            androidSilenceCount++;
+
+        }
+
+        else {
+
+            androidSilenceCount =
+                0;
+
+        }
+
+
+        // 本当に無音へ落ちた場合だけ早く終了する。
+        // 弱いSや一時的な周波数の崩れは、従来の0.60秒猶予を残す。
+        if (
+            androidSilenceCount
+            >=
+            androidSilenceReleaseFramesNeeded
+        ) {
+
+            finishCurrentS();
+
+            return;
+
+        }
+
+
+        if (
+            releaseCount
+            >=
+            androidReleaseFramesNeeded
+        ) {
+
+            finishCurrentS();
+
+        }
+
+
+        return;
+
+    }
+
+
+    // ========================================================
+    // iPad / iPhone
+    // ========================================================
+
+    if (
+        IS_IOS
+    ) {
+
+        iosActiveFrameCount++;
+
+
+        if (
+            iosActiveFrameCount
+            <=
+            iosReferenceBuildFramesNeeded
+        ) {
+
+            if (
+                result.volume
+                >
+                iosReferenceVolume
+            ) {
+
+                iosReferenceVolume =
+                    result.volume;
+
+            }
+
+        }
+
+
+        if (
+            iosActiveFrameCount
+            <=
+            iosInitialProtectionFramesNeeded
+        ) {
+
+            return;
+
+        }
+
+
+        const releaseVolume =
+            iosReleaseVolumeThreshold();
+
+
+        const lowVolumeSStillPresent =
+            iosLowVolumeSContinuation(
+                result
+            );
+
+
+        if (
+            result.volume
+            <
+            releaseVolume
+            &&
+            !lowVolumeSStillPresent
+        ) {
+
+            silenceCount++;
+
+        }
+
+        else {
+
+            silenceCount =
+                0;
+
+        }
+
+
+        if (
+            silenceCount
+            >=
+            iosReleaseFramesNeeded
+        ) {
+
+            finishCurrentS();
+
+
+            return;
+
+        }
+
+
+        if (
+            holdSIOS(
+                result
+            )
+        ) {
+
+            releaseCount =
+                0;
+
+        }
+
+        else {
+
+            releaseCount++;
+
+        }
+
+
+        if (
+            releaseCount
+            >=
+            iosSpectralReleaseFramesNeeded
+        ) {
+
+            finishCurrentS();
+
+        }
+
+
+        return;
+
+    }
+
+
+    // ========================================================
+    // PC
+    // ========================================================
+
+    if (
+        pcClearlySilent(
+            result
+        )
+    ) {
+
+        silenceCount++;
+
+    }
+
+    else {
+
+        silenceCount =
+            0;
+
+    }
+
+
+    if (
+        silenceCount
+        >=
+        pcSilenceFramesNeeded
+    ) {
+
+        finishCurrentS();
+
+
+        return;
+
+    }
+
+
+    if (
+        holdSPC(
+            result
+        )
+    ) {
+
+        releaseCount =
+            0;
+
+
+        return;
+
+    }
+
+
+    releaseCount++;
+
+
+    if (
+        releaseCount
+        >=
+        pcSoftReleaseFramesNeeded
+    ) {
+
+        finishCurrentS();
+
+    }
+
+}
+
+
+// ============================================================
+// サンプル処理
+// ============================================================
+
+function addSamples(
+    input
+) {
+
+    for (
+        let i = 0;
+        i < input.length;
+        i++
+    ) {
+
+        sampleQueue.push(
+            input[i]
+        );
+
+    }
+
+
+    while (
+        sampleQueue.length
+        -
+        queueOffset
+        >=
+        frameSize
+    ) {
+
+        const frame =
+            new Float32Array(
+                frameSize
+            );
+
+
+        for (
+            let i = 0;
+            i < frameSize;
+            i++
+        ) {
+
+            frame[i] =
+                sampleQueue[
+                    queueOffset
+                    +
+                    i
+                ];
+
+        }
+
+
+        queueOffset +=
+            frameSize;
+
+
+        const result =
+            analyzeFrame(
+                frame
+            );
+
+
+        updateAndroidDiagnostic(
+            result
+        );
+
+
+        processResult(
+            result
+        );
+
+    }
+
+
+    if (
+        queueOffset > 8192
+    ) {
+
+        sampleQueue =
+            sampleQueue.slice(
+                queueOffset
+            );
+
+
+        queueOffset =
+            0;
+
+    }
+
+}
+
+
+// ============================================================
+// Audio Graph
+// ============================================================
+
+function disconnectAudioGraph() {
+
+    try {
+
+        if (
+            processorNode
+        ) {
+
+            processorNode.onaudioprocess =
+                null;
+
+
+            processorNode.disconnect();
+
+        }
+
+    }
+
+    catch (error) {}
+
+
+    try {
+
+        if (
+            sourceNode
+        ) {
+
+            sourceNode.disconnect();
+
+        }
+
+    }
+
+    catch (error) {}
+
+
+    try {
+
+        if (
+            muteNode
+        ) {
+
+            muteNode.disconnect();
+
+        }
+
+    }
+
+    catch (error) {}
+
+
+    processorNode =
+        null;
+
+
+    sourceNode =
+        null;
+
+
+    muteNode =
+        null;
+
+}
+
+
+function buildAudioGraph() {
+
+    disconnectAudioGraph();
+
+
+    sourceNode =
+        audioContext
+            .createMediaStreamSource(
+                mediaStream
+            );
+
+
+    processorNode =
+        audioContext
+            .createScriptProcessor(
+                1024,
+                1,
+                1
+            );
+
+
+    processorNode.onaudioprocess =
+        function(event) {
+
+            lastAudioCallbackTime =
+                performance.now();
+
+
+            const input =
+                event
+                    .inputBuffer
+                    .getChannelData(
+                        0
+                    );
+
+
+            addSamples(
+                input
+            );
+
+        };
+
+
+    muteNode =
+        audioContext
+            .createGain();
+
+
+    muteNode.gain.value =
+        0;
+
+
+    sourceNode.connect(
+        processorNode
+    );
+
+
+    processorNode.connect(
+        muteNode
+    );
+
+
+    muteNode.connect(
+        audioContext.destination
+    );
+
+
+    lastAudioCallbackTime =
+        performance.now();
+
+}
+
+
+// ============================================================
+// Audio復旧
+// ============================================================
+
+async function rebuildAudioGraph() {
+
+    if (
+        rebuildingGraph
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !audioContext
+        ||
+        !mediaStream
+    ) {
+
+        return;
+
+    }
+
+
+    rebuildingGraph =
+        true;
+
+
+    resetRecognitionState(
+        true
+    );
+
+
+    sampleQueue =
+        [];
+
+
+    queueOffset =
+        0;
+
+
+    try {
+
+        if (
+            audioContext.state
+            ===
+            "suspended"
+        ) {
+
+            try {
+
+                await audioContext.resume();
+
+            }
+
+            catch (error) {}
+
+        }
+
+
+        buildAudioGraph();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+    }
+
+
+    rebuildingGraph =
+        false;
+
+}
+
+
+// ============================================================
+// Watchdog
+// ============================================================
+
+function startWatchdog() {
+
+    if (
+        watchdogTimer
+    ) {
+
+        clearInterval(
+            watchdogTimer
+        );
+
+    }
+
+
+    watchdogTimer =
+        setInterval(
+            async function() {
+
+                if (
+                    !audioContext
+                    ||
+                    !mediaStream
+                ) {
+
+                    return;
+
+                }
+
+
+                if (
+                    audioContext.state
+                    ===
+                    "suspended"
+                ) {
+
+                    try {
+
+                        await audioContext.resume();
+
+                    }
+
+                    catch (error) {}
+
+                }
+
+
+                const elapsed =
+                    performance.now()
+                    -
+                    lastAudioCallbackTime;
+
+
+                if (
+                    elapsed
+                    >
+                    AUDIO_STALL_MS
+                ) {
+
+                    await rebuildAudioGraph();
+
+                }
+
+            },
+            500
+        );
+
+}
+
+
+// ============================================================
+// 前面復帰
+// ============================================================
+
+document.addEventListener(
+    "visibilitychange",
+    async function() {
+
+        if (
+            document.visibilityState
+            !==
+            "visible"
+        ) {
+
+            return;
+
+        }
+
+
+        if (
+            !audioContext
+        ) {
+
+            return;
+
+        }
+
+
+        try {
+
+            if (
+                audioContext.state
+                ===
+                "suspended"
+            ) {
+
+                await audioContext.resume();
+
+            }
+
+        }
+
+        catch (error) {}
+
+
+        resetRecognitionState(
+            true
+        );
+
+    }
+);
+
+
+// ============================================================
+// マイク停止
+// ============================================================
+
+function stopExistingMicrophone() {
+
+    if (
+        watchdogTimer
+    ) {
+
+        clearInterval(
+            watchdogTimer
+        );
+
+
+        watchdogTimer =
+            null;
+
+    }
+
+
+    disconnectAudioGraph();
+
+
+    try {
+
+        if (
+            mediaStream
+        ) {
+
+            mediaStream
+                .getTracks()
+                .forEach(
+                    function(track) {
+
+                        track.stop();
+
+                    }
+                );
+
+
+            mediaStream =
+                null;
+
+        }
+
+    }
+
+    catch (error) {}
+
+
+    try {
+
+        if (
+            audioContext
+        ) {
+
+            audioContext.close();
+
+
+            audioContext =
+                null;
+
+        }
+
+    }
+
+    catch (error) {}
+
+}
+
+
+// ============================================================
+// マイク制約
+// ============================================================
+
+function createAudioConstraints() {
+
+    const constraints =
+        {};
+
+
+    let supported =
+        {};
+
+
+    try {
+
+        supported =
+            navigator
+                .mediaDevices
+                .getSupportedConstraints
+            ?
+            navigator
+                .mediaDevices
+                .getSupportedConstraints()
+            :
+            {};
+
+    }
+
+    catch (error) {
+
+        supported =
+            {};
+
+    }
+
+
+    if (
+        IS_IOS
+    ) {
+
+        if (
+            supported.echoCancellation
+        ) {
+
+            constraints.echoCancellation =
+                false;
+
+        }
+
+
+        if (
+            supported.noiseSuppression
+        ) {
+
+            constraints.noiseSuppression =
+                false;
+
+        }
+
+
+        if (
+            supported.autoGainControl
+        ) {
+
+            constraints.autoGainControl =
+                false;
+
+        }
+
+
+        if (
+            supported.channelCount
+        ) {
+
+            constraints.channelCount =
+                1;
+
+        }
+
+    }
+
+
+    if (
+        Object.keys(
+            constraints
+        ).length === 0
+    ) {
+
+        return true;
+
+    }
+
+
+    return constraints;
+
+}
+
+
+// ============================================================
+// マイク開始
+// ============================================================
+
+async function startMicrophone() {
+
+    if (
+        !window.isSecureContext
+    ) {
+
+        alert(
+            "HTTPS接続ではないためマイクを使用できません。"
+        );
+
+
+        return;
+
+    }
+
+
+    if (
+        !navigator.mediaDevices
+        ||
+        !navigator.mediaDevices.getUserMedia
+    ) {
+
+        alert(
+            "このブラウザではマイク機能を利用できません。"
+        );
+
+
+        return;
+
+    }
+
+
+    stopExistingMicrophone();
+
+
+    statusElement.textContent =
+        "ちょっとだけ　しずかにしてね…";
+
+
+    resetRecognitionState(
+        true
+    );
+
+
+    calibrationVolumes =
+        [];
+
+
+    calibrating =
+        true;
+
+
+    normalDynamicMin =
+        NORMAL_MIN_VOLUME;
+
+
+    weakDynamicMin =
+        WEAK_MIN_VOLUME;
+
+
+    iosWeakDynamicMin =
+        IOS_WEAK_MIN_VOLUME;
+
+
+    try {
+
+        const audioConstraints =
+            createAudioConstraints();
+
+
+        mediaStream =
+            await navigator
+                .mediaDevices
+                .getUserMedia(
+                    {
+
+                        audio:
+                            audioConstraints,
+
+                        video:
+                            false
+
+                    }
+                );
+
+
+        // iPad第8・9世代の内蔵マイク設定には影響させず、
+        // USB-C外部マイクのときだけ専用の開始フレーム数を使う。
+        iosExternalUSBMic =
+            false;
+
+
+        if (
+            IS_IOS
+        ) {
+
+            try {
+
+                const audioTracks =
+                    mediaStream.getAudioTracks();
+
+
+                const inputLabel =
+                    (
+                        audioTracks.length > 0
+                        ?
+                        audioTracks[0].label
+                        :
+                        ""
+                    )
+                    .toLowerCase();
+
+
+                iosExternalUSBMic =
+                    (
+                        inputLabel.includes("usb")
+                        ||
+                        inputLabel.includes("external")
+                        ||
+                        inputLabel.includes("input adapter")
+                    );
+
+            }
+
+            catch (error) {
+
+                iosExternalUSBMic =
+                    false;
+
+            }
+
+        }
+
+
+        const AudioContextClass =
+            window.AudioContext
+            ||
+            window.webkitAudioContext;
+
+
+        audioContext =
+            new AudioContextClass();
+
+
+        if (
+            audioContext.state
+            ===
+            "suspended"
+        ) {
+
+            await audioContext.resume();
+
+        }
+
+
+        frameSize =
+            Math.max(
+                256,
+
+                Math.round(
+                    audioContext.sampleRate
+                    *
+                    (
+                        735
+                        /
+                        44100
+                    )
+                )
+            );
+
+
+        calibrationFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    CALIBRATION_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        androidReleaseFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    ANDROID_RELEASE_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        androidSilenceReleaseFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    ANDROID_SILENCE_RELEASE_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        breathReleaseFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    BREATH_RELEASE_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        iosBreathReleaseFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    IOS_BREATH_RELEASE_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        iosBreathReferenceBuildFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    IOS_BREATH_REFERENCE_BUILD_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        pcSoftReleaseFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    PC_SOFT_RELEASE_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        pcSilenceFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    PC_SILENCE_RELEASE_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        iosReferenceBuildFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    IOS_REFERENCE_BUILD_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        iosReleaseFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    IOS_RELEASE_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        iosSpectralReleaseFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    IOS_SPECTRAL_RELEASE_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        iosInitialProtectionFramesNeeded =
+            Math.max(
+                1,
+
+                Math.round(
+                    IOS_INITIAL_PROTECTION_SECONDS
+                    *
+                    audioContext.sampleRate
+                    /
+                    frameSize
+                )
+            );
+
+
+        sampleQueue =
+            [];
+
+
+        queueOffset =
+            0;
+
+
+        buildAudioGraph();
+
+
+        startWatchdog();
+
+
+        startButton.disabled =
+            false;
+
+
+        microphoneRunning =
+            true;
+
+
+        startButton.textContent =
+            "停止";
+
+
+        updateRecognitionStatus(
+            true
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        stopExistingMicrophone();
+
+
+        resetRecognitionState(
+            true
+        );
+
+
+        calibrating =
+            false;
+
+
+        calibrationVolumes =
+            [];
+
+
+        statusElement.textContent =
+            "";
+
+
+        microphoneRunning =
+            false;
+
+
+        startButton.disabled =
+            false;
+
+
+        startButton.textContent =
+            "スタート";
+
+
+        updateRecognitionStatus(
+            false
+        );
+
+
+        alert(
+            "マイクを開始できませんでした。"
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// スタート／停止
+// ============================================================
+
+function stopMicrophoneByUser() {
+
+    stopExistingMicrophone();
+
+
+    resetRecognitionState(
+        true
+    );
+
+
+    calibrating =
+        false;
+
+
+    calibrationVolumes =
+        [];
+
+
+    sampleQueue =
+        [];
+
+
+    queueOffset =
+        0;
+
+
+    statusElement.textContent =
+        "";
+
+
+    microphoneRunning =
+        false;
+
+
+    startButton.disabled =
+        false;
+
+
+    startButton.textContent =
+        "スタート";
+
+
+    updateRecognitionStatus(
+        false
+    );
+
+}
+
+
+startButton.addEventListener(
+    "click",
+    function() {
+
+        if (
+            microphoneRunning
+        ) {
+
+            stopMicrophoneByUser();
+
+        }
+
+        else {
+
+            startMicrophone();
+
+        }
+
+    }
+);
+
+
+// ============================================================
+// 起動
+// ============================================================
+
+async function initialize() {
+
+    try {
+
+        
+
+        updateDisplayModeButton();
+
+
+        updateImageOrderButton();
+
+
+        updateMirrorMode();
+
+
+        updateWordMirrorMode();
+
+
+        await openDatabase();
+
+
+        await reloadImages();
+
+
+        clearImageElement(
+            mainImage
+        );
+
+
+        showWordImage();
+
+
+        drawBar();
+
+    }
+
+    catch (error) {
+
+        console.error(
+            error
+        );
+
+
+        alert(
+            "画像保存機能を開始できませんでした。"
+        );
+
+    }
+
+}
+
+
+initialize();
+
 </script>
+
 </body>
 </html>
